@@ -1,14 +1,16 @@
-import SystemZone from "./zones/systemZone.js";
-import IANAZone from "./zones/IANAZone.js";
-import Locale from "./impl/locale.js";
+import SystemZone from "./zones/systemZone";
+import IANAZone from "./zones/IANAZone";
+import Locale from "./impl/locale";
 
-import { normalizeZone } from "./impl/zoneUtil.js";
+import { normalizeZone } from "./impl/zoneUtil";
+import Zone from "./zone";
+import { NumberingSystem, CalendarSystem } from "./types/locale";
 
 let now = () => Date.now(),
-  defaultZone = "system",
-  defaultLocale = null,
-  defaultNumberingSystem = null,
-  defaultOutputCalendar = null;
+  defaultZone: string | Zone = "system",
+  defaultLocale: string | undefined,
+  defaultNumberingSystem: NumberingSystem | undefined,
+  defaultOutputCalendar: CalendarSystem | undefined;
 
 /**
  * Settings contains static getters and setters that control Luxon's overall behavior. Luxon is a simple library with few options, but the ones it does have live here.
@@ -63,7 +65,7 @@ export default class Settings {
    * Set the default locale to create DateTimes with. Does not affect existing instances.
    * @type {string}
    */
-  static set defaultLocale(locale) {
+  static set defaultLocale(locale: string | undefined) {
     defaultLocale = locale;
   }
 
@@ -79,7 +81,7 @@ export default class Settings {
    * Set the default numbering system to create DateTimes with. Does not affect existing instances.
    * @type {string}
    */
-  static set defaultNumberingSystem(numberingSystem) {
+  static set defaultNumberingSystem(numberingSystem: NumberingSystem | undefined) {
     defaultNumberingSystem = numberingSystem;
   }
 
@@ -95,7 +97,7 @@ export default class Settings {
    * Set the default output calendar to create DateTimes with. Does not affect existing instances.
    * @type {string}
    */
-  static set defaultOutputCalendar(outputCalendar) {
+  static set defaultOutputCalendar(outputCalendar: CalendarSystem | undefined) {
     defaultOutputCalendar = outputCalendar;
   }
 

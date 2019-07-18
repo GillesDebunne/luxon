@@ -1,11 +1,14 @@
-import Zone from "../zone.js";
+import Zone from "../zone";
+import { ZoneOffsetOptions, ZoneOffsetFormat } from "../types/zone";
 
 /**
  * A zone that failed to parse. You should never need to instantiate this.
  * @implements {Zone}
  */
 export default class InvalidZone extends Zone {
-  constructor(zoneName) {
+  private zoneName: Readonly<string>;
+
+  constructor(zoneName: string) {
     super();
     /**  @private */
     this.zoneName = zoneName;
@@ -27,12 +30,12 @@ export default class InvalidZone extends Zone {
   }
 
   /** @override **/
-  offsetName() {
+  offsetName(_ts: number, _options: ZoneOffsetOptions) {
     return null;
   }
 
   /** @override **/
-  formatOffset() {
+  formatOffset(_ts: number, _format: ZoneOffsetFormat) {
     return "";
   }
 

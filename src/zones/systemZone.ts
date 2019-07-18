@@ -1,7 +1,8 @@
-import { formatOffset, parseZoneInfo, hasIntl } from "../impl/util.js";
-import Zone from "../zone.js";
+import { formatOffset, parseZoneInfo, hasIntl } from "../impl/util";
+import Zone from "../zone";
+import { ZoneOffsetFormat, ZoneOffsetOptions } from "../types/zone";
 
-let singleton = null;
+let singleton: SystemZone | null = null;
 
 /**
  * Represents the local zone for this Javascript environment.
@@ -37,22 +38,22 @@ export default class SystemZone extends Zone {
   }
 
   /** @override **/
-  offsetName(ts, { format, locale }) {
+  offsetName(ts: number, { format, locale }: ZoneOffsetOptions) {
     return parseZoneInfo(ts, format, locale);
   }
 
   /** @override **/
-  formatOffset(ts, format) {
+  formatOffset(ts: number, format: ZoneOffsetFormat) {
     return formatOffset(this.offset(ts), format);
   }
 
   /** @override **/
-  offset(ts) {
+  offset(ts: number) {
     return -new Date(ts).getTimezoneOffset();
   }
 
   /** @override **/
-  equals(otherZone) {
+  equals(otherZone: Zone) {
     return otherZone.type === "system";
   }
 

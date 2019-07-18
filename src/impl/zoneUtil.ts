@@ -2,16 +2,15 @@
  * @private
  */
 
-import Zone from "../zone.js";
-import IANAZone from "../zones/IANAZone.js";
-import FixedOffsetZone from "../zones/fixedOffsetZone.js";
-import InvalidZone from "../zones/invalidZone.js";
+import Zone from "../zone";
+import IANAZone from "../zones/IANAZone";
+import FixedOffsetZone from "../zones/fixedOffsetZone";
+import InvalidZone from "../zones/invalidZone";
+import SystemZone from "../zones/systemZone";
 
-import { isUndefined, isString, isNumber } from "./util.js";
-import { SystemZone } from "../luxon.js";
+import { isUndefined, isString, isNumber } from "./util";
 
-export function normalizeZone(input, defaultZone) {
-  let offset;
+export function normalizeZone(input: number | string | Zone | undefined | null, defaultZone: Zone) {
   if (isUndefined(input) || input === null) return defaultZone;
   if (input instanceof Zone) return input;
   if (isString(input)) {
@@ -19,7 +18,8 @@ export function normalizeZone(input, defaultZone) {
     if (lowered === "default") return defaultZone;
     if (lowered === "system") return SystemZone.instance;
     if (lowered === "utc") return FixedOffsetZone.utcInstance;
-    if ((offset = IANAZone.parseGMTOffset(input)) != null) {
+    const offset = IANAZone.parseGMTOffset(input);
+    if (offset != null) {
       // handle Etc/GMT-4, which V8 chokes on
       return FixedOffsetZone.instance(offset);
     }
@@ -27,10 +27,11 @@ export function normalizeZone(input, defaultZone) {
     return FixedOffsetZone.parseSpecifier(lowered) || new InvalidZone(input);
   }
   if (isNumber(input)) return FixedOffsetZone.instance(input);
-  if (typeof input === "object" && input.offset && typeof input.offset === "number") {
-    // This is dumb, but the instanceof check above doesn't seem to really work
-    // so we're duck checking it
-    return input;
-  }
+  // GILLES commenting out for now
+  // if (typeof input === "object" && input.offset && typeof input.offset === "number") {
+  // This is dumb, but the instanceof check above doesn't seem to really work
+  // so we're duck checking it
+  // return input;
+  // }
   return new InvalidZone(input);
 }

@@ -1,7 +1,10 @@
-import * as Formats from "./formats.js";
-import { pick } from "./util.js";
+import * as Formats from "./formats";
+import { pick } from "./util";
+import { UnitLength, StringUnitLength } from "../types/common";
+import DateTime from "../datetime";
+import { ToRelativeNumeric, ToRelativeUnit, DateTimeFormatOptions } from "src/types/datetime";
 
-function stringify(obj) {
+function stringify(obj: Object) {
   return JSON.stringify(obj, Object.keys(obj).sort());
 }
 
@@ -41,7 +44,7 @@ export const monthsShort = [
 
 export const monthsNarrow = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
-export function months(length) {
+export function months(length: UnitLength) {
   switch (length) {
     case "narrow":
       return monthsNarrow;
@@ -53,8 +56,6 @@ export function months(length) {
       return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
     case "2-digit":
       return ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-    default:
-      return null;
   }
 }
 
@@ -72,7 +73,7 @@ export const weekdaysShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export const weekdaysNarrow = ["M", "T", "W", "T", "F", "S", "S"];
 
-export function weekdays(length) {
+export function weekdays(length: UnitLength) {
   switch (length) {
     case "narrow":
       return weekdaysNarrow;
@@ -82,8 +83,8 @@ export function weekdays(length) {
       return weekdaysLong;
     case "numeric":
       return ["1", "2", "3", "4", "5", "6", "7"];
-    default:
-      return null;
+    case "2-digit": // GILLES added
+      return ["01", "02", "03", "04", "05", "06", "07"];
   }
 }
 
@@ -95,7 +96,7 @@ export const erasShort = ["BC", "AD"];
 
 export const erasNarrow = ["B", "A"];
 
-export function eras(length) {
+export function eras(length: StringUnitLength) {
   switch (length) {
     case "narrow":
       return erasNarrow;
@@ -103,31 +104,34 @@ export function eras(length) {
       return erasShort;
     case "long":
       return erasLong;
-    default:
-      return null;
   }
 }
 
-export function meridiemForDateTime(dt) {
+export function meridiemForDateTime(dt: DateTime) {
   return meridiems[dt.hour < 12 ? 0 : 1];
 }
 
-export function weekdayForDateTime(dt, length) {
+export function weekdayForDateTime(dt: DateTime, length: UnitLength) {
   return weekdays(length)[dt.weekday - 1];
 }
 
-export function monthForDateTime(dt, length) {
+export function monthForDateTime(dt: DateTime, length: UnitLength) {
   return months(length)[dt.month - 1];
 }
 
-export function eraForDateTime(dt, length) {
+export function eraForDateTime(dt: DateTime, length: StringUnitLength) {
   return eras(length)[dt.year < 0 ? 0 : 1];
 }
 
-export function formatRelativeTime(unit, count, numeric = "always", narrow = false) {
-  const units = {
+export function formatRelativeTime(
+  unit: ToRelativeUnit,
+  count: number,
+  numeric: ToRelativeNumeric = "always",
+  narrow = false
+) {
+  const units: { [key in ToRelativeUnit]: [string, string] } = {
     years: ["year", "yr."],
-    quarters: ["quarer", "qtr."],
+    quarters: ["quarter", "qtr."], // GILLES typo
     months: ["month", "mo."],
     weeks: ["week", "wk."],
     days: ["day", "day"],
@@ -152,12 +156,12 @@ export function formatRelativeTime(unit, count, numeric = "always", narrow = fal
   }
 
   const isInPast = Object.is(count, -0) || count < 0,
-    fmtValue = Math.abs(count),
-    fmtUnit = narrow ? units[unit][1] : fmtValue === 1 ? units[unit][0] : unit;
-  return isInPast ? `${fmtValue} ${fmtUnit} ago` : `in ${fmtValue} ${fmtUnit}`;
+    formatValue = Math.abs(count),
+    formatUnit = narrow ? units[unit][1] : formatValue === 1 ? units[unit][0] : unit;
+  return isInPast ? `${formatValue} ${formatUnit} ago` : `in ${formatValue} ${formatUnit}`;
 }
 
-export function formatString(knownFormat) {
+export function formatString(knownFormat: DateTimeFormatOptions) {
   // these all have the offsets removed because we don't have access to them
   // without all the intl stuff this is backfilling
   const filtered = pick(knownFormat, [

@@ -1,3 +1,6 @@
+import Zone from "./zone";
+import DateTime from "./datetime";
+
 // these aren't really private, but nor are they really useful to document
 
 /**
@@ -9,7 +12,7 @@ class LuxonError extends Error {}
  * @private
  */
 export class UnitOutOfRangeError extends LuxonError {
-  constructor(unit, value) {
+  constructor(unit: string, value: unknown) {
     super(`you specified ${value} (of type ${typeof value}) as a ${unit}, which is invalid`);
   }
 }
@@ -18,7 +21,7 @@ export class UnitOutOfRangeError extends LuxonError {
  * @private
  */
 export class InvalidUnitError extends LuxonError {
-  constructor(unit) {
+  constructor(unit: string) {
     super(`Invalid unit ${unit}`);
   }
 }
@@ -27,7 +30,7 @@ export class InvalidUnitError extends LuxonError {
  * @private
  */
 export class InvalidZoneError extends LuxonError {
-  constructor(zone) {
+  constructor(zone: Zone) {
     super(`${zone.name} is an invalid or unknown zone specifier`);
   }
 }
@@ -36,7 +39,7 @@ export class InvalidZoneError extends LuxonError {
  * @private
  */
 export class MissingPlatformFeatureError extends LuxonError {
-  constructor(feature) {
+  constructor(feature: string) {
     super(`missing ${feature} support`);
   }
 }
@@ -45,7 +48,7 @@ export class MissingPlatformFeatureError extends LuxonError {
  * @private
  */
 export class MismatchedWeekdayError extends LuxonError {
-  constructor(weekday, inst) {
+  constructor(weekday: number, inst: DateTime) {
     super(`you can't specify both a weekday of ${weekday} and a date of ${inst.toISO()}`);
   }
 }
@@ -54,7 +57,7 @@ export class MismatchedWeekdayError extends LuxonError {
  * @private
  */
 export class UnparsableStringError extends LuxonError {
-  constructor(format, text) {
+  constructor(format: string, text: string) {
     super(`can't parse ${text} into format ${format}`);
   }
 }

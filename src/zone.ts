@@ -1,4 +1,5 @@
-import { ZoneIsAbstractError } from "./errors.js";
+import { ZoneIsAbstractError } from "./errors";
+import { ZoneOffsetOptions, ZoneOffsetFormat } from "./types/zone";
 
 /**
  * @interface
@@ -9,7 +10,7 @@ export default class Zone {
    * @abstract
    * @type {string}
    */
-  get type() {
+  get type(): string {
     throw new ZoneIsAbstractError();
   }
 
@@ -18,7 +19,7 @@ export default class Zone {
    * @abstract
    * @type {string}
    */
-  get name() {
+  get name(): string {
     throw new ZoneIsAbstractError();
   }
 
@@ -27,7 +28,7 @@ export default class Zone {
    * @abstract
    * @type {boolean}
    */
-  get universal() {
+  get universal(): boolean {
     throw new ZoneIsAbstractError();
   }
 
@@ -35,12 +36,12 @@ export default class Zone {
    * Returns the offset's common name (such as EST) at the specified timestamp
    * @abstract
    * @param {number} ts - Epoch milliseconds for which to get the name
-   * @param {Object} opts - Options to affect the format
-   * @param {string} opts.format - What style of offset to return. Accepts 'long' or 'short'.
-   * @param {string} opts.locale - What locale to return the offset name in.
+   * @param {Object} options - Options to affect the format
+   * @param {string} options.format - What style of offset to return. Accepts 'long' or 'short'.
+   * @param {string} options.locale - What locale to return the offset name in.
    * @return {string}
    */
-  offsetName(ts, opts) {
+  offsetName(_ts: number, _options: ZoneOffsetOptions): string | null {
     throw new ZoneIsAbstractError();
   }
 
@@ -52,7 +53,7 @@ export default class Zone {
    *                          Accepts 'narrow', 'short', or 'techie'. Returning '+6', '+06:00', or '+0600' respectively
    * @return {string}
    */
-  formatOffset(ts, format) {
+  formatOffset(_ts: number, _format: ZoneOffsetFormat): string {
     throw new ZoneIsAbstractError();
   }
 
@@ -62,7 +63,7 @@ export default class Zone {
    * @param {number} ts - Epoch milliseconds for which to compute the offset
    * @return {number}
    */
-  offset(ts) {
+  offset(_ts: number): number {
     throw new ZoneIsAbstractError();
   }
 
@@ -72,7 +73,7 @@ export default class Zone {
    * @param {Zone} otherZone - the zone to compare
    * @return {boolean}
    */
-  equals(otherZone) {
+  equals(_otherZone: Zone): boolean {
     throw new ZoneIsAbstractError();
   }
 
@@ -81,7 +82,7 @@ export default class Zone {
    * @abstract
    * @type {boolean}
    */
-  get isValid() {
+  get isValid(): boolean {
     throw new ZoneIsAbstractError();
   }
 }
