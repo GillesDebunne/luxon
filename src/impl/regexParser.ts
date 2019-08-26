@@ -5,13 +5,13 @@ import {
   parseMillis,
   ianaRegex,
   isUndefined
-} from "./util.js";
+} from "./util";
 import * as English from "./english";
 import FixedOffsetZone from "../zones/fixedOffsetZone";
 import IANAZone from "../zones/IANAZone";
-import Zone from "src/zone.js";
-import { GenericDateTime } from "src/types/datetime.js";
-import { DurationObject } from "src/types/duration.js";
+import Zone from "../zone";
+import { GenericDateTime } from "../types/datetime";
+import { DurationObject } from "../types/duration";
 
 /*
  * This file handles parsing for well-specified formats. Here's how it works:
@@ -49,7 +49,7 @@ function combineExtractors(...extractors: CombinableExtractor[]) {
 }
 
 function parse(s: string, ...patterns: ParsePattern[]) {
-  if (s == null) {
+  if (s === undefined || s === null) {
     return [null, null];
   }
 

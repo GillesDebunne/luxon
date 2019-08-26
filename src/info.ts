@@ -7,7 +7,7 @@ import { normalizeZone } from "./impl/zoneUtil";
 import { hasFormatToParts, hasIntl, hasRelative } from "./impl/util";
 import { StringUnitLength, UnitLength } from "./types/common";
 import { InfoOptions, Features, InfoCalendarOptions, InfoUnitOptions } from "./types/info";
-import Zone from "./zone";
+import { ZoneParameter } from "./types/zone";
 
 /**
  * The Info class contains static methods for retrieving general time and date related data. For example, it has methods for finding out if a time zone has a DST, for listing the months in any supported locale, and for discovering which of Luxon features are available in the current environment.
@@ -15,16 +15,18 @@ import Zone from "./zone";
 export default class Info {
   /**
    * Return whether the specified zone contains a DST.
-   * @param {string|Zone} [zone='default'] - Zone to check. Defaults to the system's time zone, unless overriden in Settings.defaultZone
+   * @param {string|Zone|number} [zone='default'] - Zone to check. Defaults to the system's time zone, unless overriden in Settings.defaultZone
    * @return {boolean}
    */
-  static hasDST(zone: string | Zone) {
+  static hasDST(zone?: ZoneParameter) {
     const zoneObj = normalizeZone(zone, Settings.defaultZone);
 
     if (!zoneObj.isValid) {
       return false;
     }
-    const proto = (DateTime.local() as DateTime).setZone(zoneObj).set({ month: 12 });
+    const proto = DateTime.local()
+      .setZone(zoneObj)
+      .set({ month: 12 });
 
     return !zoneObj.universal && proto.offset !== proto.set({ month: 6 }).offset;
   }
@@ -55,7 +57,7 @@ export default class Info {
    * @param {string|Zone|number} [input] - the value to be converted
    * @return {Zone}
    */
-  static normalizeZone(input?: number | string | Zone) {
+  static normalizeZone(input?: ZoneParameter) {
     return normalizeZone(input, Settings.defaultZone);
   }
 

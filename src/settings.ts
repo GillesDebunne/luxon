@@ -3,11 +3,11 @@ import IANAZone from "./zones/IANAZone";
 import Locale from "./impl/locale";
 
 import { normalizeZone } from "./impl/zoneUtil";
-import Zone from "./zone";
 import { NumberingSystem, CalendarSystem } from "./types/locale";
+import { ZoneParameter } from "./types/zone";
 
 let now = () => Date.now(),
-  defaultZone: string | Zone = "system",
+  defaultZone: ZoneParameter | undefined,
   defaultLocale: string | undefined,
   defaultNumberingSystem: NumberingSystem | undefined,
   defaultOutputCalendar: CalendarSystem | undefined;
@@ -38,9 +38,10 @@ export default class Settings {
   /**
    * Set the default time zone to create DateTimes in. Does not affect existing instances.
    * Use the value "system" to reset this value to the system's time zone.
-   * @type {string}
+   * @type {Zone | string | number | undefined}
    */
-  static set defaultZone(zone) {
+  static setDefaultZone(zone?: ZoneParameter) {
+    // GILLES change API !!!
     defaultZone = zone;
   }
 

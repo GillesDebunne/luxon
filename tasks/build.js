@@ -5,6 +5,7 @@ const rollup = require("rollup"),
   rollupMinify = require("rollup-plugin-babel-minify"),
   rollupNode = require("rollup-plugin-node-resolve"),
   rollupCommonJS = require("rollup-plugin-commonjs"),
+  typescript = require("rollup-plugin-typescript"),
   UglifyJS = require("uglify-js"),
   fs = require("fs");
 
@@ -23,7 +24,7 @@ function rollupInputOpts(opts) {
   }
 
   const inputOpts = {
-    input: opts.src || "./src/luxon.js",
+    input: opts.src || "./src/luxon.ts",
     onwarn: warning => {
       // I don't care about these for now
       if (warning.code !== "CIRCULAR_DEPENDENCY") {
@@ -32,6 +33,7 @@ function rollupInputOpts(opts) {
     },
 
     plugins: [
+      typescript(),
       rollupNode(),
       rollupCommonJS({
         include: "node_modules/**"
@@ -141,7 +143,7 @@ async function globalFilled() {
     global: true,
     name: "luxon",
     target: browsersOld,
-    src: "./src/luxonFilled.js",
+    src: "./src/luxonFilled.ts",
     minify: true
   });
 }
@@ -160,7 +162,7 @@ async function amdFilled() {
     format: "amd",
     name: "luxon",
     target: browsersOld,
-    src: "./src/luxonFilled.js",
+    src: "./src/luxonFilled.ts",
     minify: true
   });
 }

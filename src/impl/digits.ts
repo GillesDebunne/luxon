@@ -1,4 +1,4 @@
-import { NumberingSystem } from "src/types/locale";
+import { NumberingSystem } from "../types/locale";
 import Locale from "./locale";
 
 const numberingSystems: { [key in NumberingSystem]: string } = {

@@ -6,8 +6,8 @@ import {
   daysInMonth,
   weeksInWeekYear,
   isNumber
-} from "./util.js";
-import { TimeObject, WeekDateTime, GregorianDateTime, OrdinalDateTime } from "../types/datetime.js";
+} from "./util";
+import { TimeObject, WeekDateTime, GregorianDateTime, OrdinalDateTime } from "../types/datetime";
 
 const nonLeapLadder = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334],
   leapLadder = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335];

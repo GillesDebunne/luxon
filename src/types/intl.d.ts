@@ -1,6 +1,5 @@
-import { DurationUnit } from "./duration";
 import { StringUnitLength } from "./common";
-import { ToRelativeNumeric } from "./datetime";
+import { ToRelativeNumeric, ToRelativeUnit } from "./datetime";
 
 // From https://github.com/Microsoft/TypeScript/issues/29129
 declare global {
@@ -18,9 +17,9 @@ declare global {
 
       static supportedLocalesOf(locales: string[]): string[];
 
-      format(value: number, unit: DurationUnit): string;
+      format(value: number, unit: ToRelativeUnit): string;
 
-      formatToParts(value: number, unit: DurationUnit): string[];
+      formatToParts(value: number, unit: ToRelativeUnit): string[];
 
       resolvedOptions(): RelativeTimeFormatOptions;
     }

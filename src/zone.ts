@@ -3,8 +3,9 @@ import { ZoneOffsetOptions, ZoneOffsetFormat } from "./types/zone";
 
 /**
  * @interface
+ * An abstract Zone class
  */
-export default class Zone {
+export default abstract class Zone {
   /**
    * The type of zone
    * @abstract
@@ -39,7 +40,7 @@ export default class Zone {
    * @param {Object} options - Options to affect the format
    * @param {string} options.format - What style of offset to return. Accepts 'long' or 'short'.
    * @param {string} options.locale - What locale to return the offset name in.
-   * @return {string}
+   * @return {string | null}
    */
   offsetName(_ts: number, _options: ZoneOffsetOptions): string | null {
     throw new ZoneIsAbstractError();

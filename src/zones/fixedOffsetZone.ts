@@ -2,7 +2,7 @@ import { formatOffset, signedOffset } from "../impl/util";
 import Zone from "../zone";
 import { ZoneOffsetFormat, ZoneOffsetOptions } from "../types/zone";
 
-let singleton: FixedOffsetZone | null = null;
+let singleton: FixedOffsetZone | undefined;
 
 /**
  * A zone with a fixed offset (i.e. no DST)
@@ -16,7 +16,7 @@ export default class FixedOffsetZone extends Zone {
    * @return {FixedOffsetZone}
    */
   static get utcInstance() {
-    if (singleton === null) {
+    if (singleton === undefined) {
       singleton = new FixedOffsetZone(0);
     }
     return singleton;
@@ -37,7 +37,7 @@ export default class FixedOffsetZone extends Zone {
    * @example FixedOffsetZone.parseSpecifier("UTC+6")
    * @example FixedOffsetZone.parseSpecifier("UTC+06")
    * @example FixedOffsetZone.parseSpecifier("UTC-6:00")
-   * @return {FixedOffsetZone}
+   * @return {FixedOffsetZone | null}
    */
   static parseSpecifier(s: string) {
     if (s) {
@@ -66,7 +66,7 @@ export default class FixedOffsetZone extends Zone {
   }
 
   /** @override **/
-  offsetName(_ts: number, _options: ZoneOffsetOptions) {
+  offsetName(_ts?: number, _options?: ZoneOffsetOptions) {
     return this.name;
   }
 
@@ -81,12 +81,12 @@ export default class FixedOffsetZone extends Zone {
   }
 
   /** @override **/
-  offset() {
+  offset(_ts?: number) {
     return this.fixed;
   }
 
   /** @override **/
-  equals(otherZone: Zone) {
+  equals(otherZone: Zone): boolean {
     return otherZone.type === "fixed" && (otherZone as FixedOffsetZone).fixed === this.fixed;
   }
 

@@ -4,8 +4,8 @@ import FixedOffsetZone from "../zones/fixedOffsetZone";
 import IANAZone from "../zones/IANAZone";
 import { digitRegex, parseDigits } from "./digits";
 import Locale from "./locale";
-import { GenericDateTime, ExplainedFormat } from "src/types/datetime";
-import Zone from "src/zone";
+import { GenericDateTime, ExplainedFormat } from "../types/datetime";
+import Zone from "../zone";
 
 const MISSING_FTP = "missing Intl.DateTimeFormat.formatToParts support";
 
@@ -13,6 +13,7 @@ interface UnitParser {
   regex: RegExp;
   deser: (_: string[]) => number | string;
   groups?: number;
+  literal?: boolean; // GILLES investigate if this shall not be merged with token.literal
   token: FormatToken;
 }
 
@@ -22,8 +23,8 @@ interface InvalidUnitParser {
 
 type CoreUnitParser = Omit<UnitParser, "token">;
 
-function intUnit(regex: RegExp, post: (_: number) => number = i => i) {
-  return { regex, deser: ([s]) => post(parseDigits(s)) } as CoreUnitParser;
+function intUnit(regex: RegExp, post: (_: number) => number = i => i): CoreUnitParser {
+  return { regex, deser: ([s]) => post(parseDigits(s)) };
 }
 
 function fixListRegex(s: string) {
@@ -35,24 +36,21 @@ function stripInsensitivities(s: string) {
   return s.replace(/\./, "").toLowerCase();
 }
 
-function oneOf(strings: string[], startIndex: number) {
-  if (strings === null) {
-    return null;
-  } else {
-    return {
-      regex: RegExp(strings.map(fixListRegex).join("|")),
-      deser: ([s]) =>
-        strings.findIndex(i => stripInsensitivities(s) === stripInsensitivities(i)) + startIndex
-    } as CoreUnitParser;
-  }
+function oneOf(strings: string[], startIndex: number): CoreUnitParser {
+  // GILLES removed null case
+  return {
+    regex: RegExp(strings.map(fixListRegex).join("|")),
+    deser: ([s]) =>
+      strings.findIndex(i => stripInsensitivities(s) === stripInsensitivities(i)) + startIndex
+  };
 }
 
-function offset(regex: RegExp, groups: number) {
-  return { regex, deser: ([, h, m]) => signedOffset(h, m), groups } as CoreUnitParser;
+function offset(regex: RegExp, groups: number): CoreUnitParser {
+  return { regex, deser: ([, h, m]) => signedOffset(h, m), groups };
 }
 
-function simple(regex: RegExp) {
-  return { regex, deser: ([s]) => s } as CoreUnitParser;
+function simple(regex: RegExp): CoreUnitParser {
+  return { regex, deser: ([s]) => s };
 }
 
 function escapeToken(value: string) {
@@ -72,11 +70,11 @@ function unitForToken(token: FormatToken, loc: Locale) {
     oneToNine = digitRegex(loc, "{1,9}"),
     twoToFour = digitRegex(loc, "{2,4}"),
     fourToSix = digitRegex(loc, "{4,6}"),
-    literal = (t: FormatToken) =>
-      ({
-        regex: RegExp(escapeToken(t.val)),
-        deser: ([s]) => s
-      } as CoreUnitParser),
+    literal = (t: FormatToken): CoreUnitParser => ({
+      regex: RegExp(escapeToken(t.val)),
+      deser: ([s]) => s,
+      literal: true
+    }),
     unitate = (t: FormatToken) => {
       if (token.literal) {
         return literal(t);
@@ -193,9 +191,9 @@ function unitForToken(token: FormatToken, loc: Locale) {
   if (unit === null)
     return {
       invalidReason: MISSING_FTP
-    } as InvalidUnitParser;
+    };
 
-  return { ...unit, token } as UnitParser;
+  return { ...unit, token };
 }
 
 function buildRegex(units: UnitParser[]) {
@@ -217,8 +215,7 @@ function match(
       if (hasOwnProperty(handlers, i)) {
         const h = handlers[i],
           groups = h.groups ? h.groups + 1 : 1;
-        if (!h.token.literal) {
-          // GILLES h.literal does not exist
+        if (!h.literal) {
           all[h.token.val[0]] = h.deser(matches.slice(matchIndex, matchIndex + groups));
         }
         matchIndex += groups;
@@ -308,20 +305,20 @@ function isInvalidUnitParser(parser: any): parser is InvalidUnitParser {
 /**
  * @private
  */
-export function explainFromTokens(locale: Locale, input: string, format: string) {
+export function explainFromTokens(locale: Locale, input: string, format: string): ExplainedFormat {
   const tokens = Formatter.parseFormat(format),
     units = tokens.map(t => unitForToken(t, locale)),
     disqualifyingUnit = units.find(isInvalidUnitParser);
 
   if (disqualifyingUnit) {
-    return { input, tokens, invalidReason: disqualifyingUnit.invalidReason } as ExplainedFormat;
+    return { input, tokens, invalidReason: disqualifyingUnit.invalidReason };
   } else {
     const regexString = buildRegex(units as UnitParser[]),
       regex = RegExp(regexString, "i"),
       [rawMatches, matches] = match(input, regex, units as UnitParser[]),
       [result, zone] = matches ? dateTimeFromMatches(matches) : [null, null];
 
-    return { input, tokens, regex, rawMatches, matches, result, zone } as ExplainedFormat;
+    return { input, tokens, regex, rawMatches, matches, result, zone };
   }
 }
 

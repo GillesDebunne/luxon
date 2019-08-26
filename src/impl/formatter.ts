@@ -2,12 +2,12 @@ import * as English from "./english";
 import * as Formats from "./formats";
 import { padStart } from "./util";
 import Locale from "./locale";
-import DateTime from "src/datetime";
-import Duration from "src/duration";
-import { StringUnitLength } from "src/types/common";
-import { DateTimeFormatOptions } from "src/types/datetime";
-import { DurationUnit } from "src/types/duration";
-import { ZoneOffsetFormat } from "src/types/zone";
+import DateTime from "../datetime";
+import Duration from "../duration";
+import { StringUnitLength } from "../types/common";
+import { DateTimeFormatOptions } from "../types/datetime";
+import { DurationUnit } from "../types/duration";
+import { ZoneOffsetFormat } from "../types/zone";
 
 function stringifyTokens(
   splits: FormatToken[],
@@ -75,7 +75,7 @@ export default class Formatter {
   }
 
   static parseFormat(format: string) {
-    let current = null,
+    let current = undefined,
       currentFull = "",
       bracketedLevel = 0;
 
@@ -87,7 +87,7 @@ export default class Formatter {
           if (currentFull.length > 0) {
             splits.push({ literal: false, val: currentFull });
           }
-          current = null;
+          current = undefined;
           currentFull = "";
         } else currentFull += c;
         bracketedLevel = bracketedLevel + 1;
@@ -97,7 +97,7 @@ export default class Formatter {
           if (currentFull.length > 0) {
             splits.push({ literal: true, val: currentFull });
           }
-          current = null;
+          current = undefined;
           currentFull = "";
         } else currentFull += c;
       } else if (bracketedLevel > 0) {
@@ -378,7 +378,7 @@ export default class Formatter {
   }
 
   formatDurationFromString(dur: Duration, format: string) {
-    const tokenToField = (token: string) => {
+    const tokenToField = (token: string): DurationUnit | undefined => {
         switch (token[0]) {
           case "S":
             return "milliseconds";

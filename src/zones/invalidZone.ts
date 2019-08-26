@@ -30,7 +30,7 @@ export default class InvalidZone extends Zone {
   }
 
   /** @override **/
-  offsetName(_ts: number, _options: ZoneOffsetOptions) {
+  offsetName(_ts?: number, _options?: ZoneOffsetOptions) {
     return null;
   }
 
@@ -40,12 +40,12 @@ export default class InvalidZone extends Zone {
   }
 
   /** @override **/
-  offset() {
+  offset(_ts?: number) {
     return NaN;
   }
 
   /** @override **/
-  equals() {
+  equals(_otherZone: Zone) {
     return false;
   }
 

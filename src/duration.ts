@@ -7,12 +7,28 @@ import {
   DurationObject,
   DurationOptions,
   DurationToFormatOptions,
-  DurationUnit
-} from "./types/duration.js";
-import { ConversionAccuracy } from "./types/common";
+  DurationUnit,
+  DurationFromISOOptions
+} from "./types/duration";
+import { ConversionAccuracy, ThrowOnInvalid } from "./types/common";
 
-type ConversionMatrixUnit = Exclude<DurationUnit, "milliseconds">;
-type ConversionMatrix = { [key in ConversionMatrixUnit]: { [key in DurationUnit]?: number } };
+interface NormalizedDurationObject {
+  years?: number;
+  quarters?: number;
+  months?: number;
+  weeks?: number;
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+  milliseconds?: number;
+}
+type NormalizedDurationUnit = keyof NormalizedDurationObject;
+
+type ConversionMatrixUnit = Exclude<NormalizedDurationUnit, "milliseconds">;
+type ConversionMatrix = Readonly<
+  { [key in ConversionMatrixUnit]: { [key in NormalizedDurationUnit]?: number } }
+>;
 
 // unit conversion constants
 const lowOrderMatrix = {
@@ -36,6 +52,7 @@ const lowOrderMatrix = {
   casualMatrix: ConversionMatrix = Object.assign(
     {
       years: {
+        quarters: 4, // GILLES added
         months: 12,
         weeks: 52,
         days: 365,
@@ -50,6 +67,7 @@ const lowOrderMatrix = {
         days: 91,
         hours: 91 * 24,
         minutes: 91 * 24 * 60,
+        seconds: 91 * 24 * 60 * 60, // GILLES added
         milliseconds: 91 * 24 * 60 * 60 * 1000
       },
       months: {
@@ -68,6 +86,7 @@ const lowOrderMatrix = {
   accurateMatrix: ConversionMatrix = Object.assign(
     {
       years: {
+        quarters: 4, // GILLES added
         months: 12,
         weeks: daysInYearAccurate / 7,
         days: daysInYearAccurate,
@@ -98,7 +117,7 @@ const lowOrderMatrix = {
   );
 
 // units ordered by size
-const orderedUnits: DurationUnit[] = [
+const orderedUnits: NormalizedDurationUnit[] = [
   "years",
   "quarters",
   "months",
@@ -119,9 +138,9 @@ function antiTrunc(n: number) {
 // NB: mutates parameters
 function convert(
   matrix: ConversionMatrix,
-  fromMap: DurationObject,
-  fromUnit: DurationUnit,
-  toMap: DurationObject,
+  fromMap: NormalizedDurationObject,
+  fromUnit: NormalizedDurationUnit,
+  toMap: NormalizedDurationObject,
   toUnit: ConversionMatrixUnit
 ) {
   const conv = matrix[toUnit][fromUnit] as number,
@@ -130,13 +149,14 @@ function convert(
     // ok, so this is wild, but see the matrix in the tests
     added =
       !sameSign && toMap[toUnit] !== 0 && Math.abs(raw) <= 1 ? antiTrunc(raw) : Math.trunc(raw);
+
   toMap[toUnit] = (toMap[toUnit] as number) + added;
   fromMap[fromUnit] = (fromMap[fromUnit] as number) - added * conv;
 }
 
-// NB: mutates parameters
-function normalizeValues(matrix: ConversionMatrix, vals: DurationObject) {
-  let previousUnit: DurationUnit | undefined;
+// NB: mutates vals parameters
+function normalizeValues(matrix: ConversionMatrix, vals: NormalizedDurationObject) {
+  let previousUnit: NormalizedDurationUnit | undefined;
   reverseUnits.forEach(unit => {
     if (!isUndefined(vals[unit])) {
       if (previousUnit) {
@@ -149,7 +169,7 @@ function normalizeValues(matrix: ConversionMatrix, vals: DurationObject) {
 
 interface Config {
   conversionAccuracy?: ConversionAccuracy;
-  values: DurationObject;
+  values: NormalizedDurationObject;
   loc: Locale;
 }
 
@@ -168,10 +188,9 @@ interface Config {
  */
 export default class Duration {
   // Private readonly fields
-  private values: Readonly<DurationObject>;
+  private values: Readonly<NormalizedDurationObject>;
   private loc: Locale;
-  private conversionAccuracy: Readonly<ConversionAccuracy>;
-  private matrix: Readonly<ConversionMatrix>;
+  private matrix: ConversionMatrix;
   private isLuxonDuration: Readonly<true>;
 
   /**
@@ -190,10 +209,6 @@ export default class Duration {
     /**
      * @access private
      */
-    this.conversionAccuracy = accurate ? "longterm" : "casual";
-    /**
-     * @access private
-     */
     this.matrix = accurate ? accurateMatrix : casualMatrix;
     /**
      * @access private
@@ -208,7 +223,6 @@ export default class Duration {
    * @param {string} [options.locale='en-US'] - the locale to use
    * @param {string} options.numberingSystem - the numbering system to use
    * @param {string} [options.conversionAccuracy='casual'] - the conversion system to use
-   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @return {Duration}
    */
   static fromMillis(count: number, options: DurationOptions = {}) {
@@ -232,11 +246,10 @@ export default class Duration {
    * @param {string} [options.locale='en-US'] - the locale to use
    * @param {string} options.numberingSystem - the numbering system to use
    * @param {string} [options.conversionAccuracy='casual'] - the conversion system to use
-   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @return {Duration}
    */
   static fromObject(obj: DurationObject, options: DurationOptions = {}) {
-    if (obj == null || typeof obj !== "object") {
+    if (obj === undefined || obj === null || typeof obj !== "object") {
       throw new InvalidArgumentError(
         `Duration.fromObject: argument expected to be an object, got ${
           obj === null ? "null" : typeof obj
@@ -264,7 +277,10 @@ export default class Duration {
    * @example Duration.fromISO('P5Y3M').toObject() //=> { years: 5, months: 3 }
    * @return {Duration}
    */
-  static fromISO(text: string, options: DurationOptions = {}) {
+  static fromISO(text: string): Duration;
+  static fromISO(text: string, options: DurationFromISOOptions & ThrowOnInvalid): Duration;
+  static fromISO(text: string, options: DurationFromISOOptions): Duration | null;
+  static fromISO(text: string, options: DurationFromISOOptions = {}) {
     const parsed = parseISODuration(text);
     if (parsed) {
       return Duration.fromObject(parsed, options);
@@ -278,7 +294,7 @@ export default class Duration {
    * @private
    */
   static normalizeUnit(unit: string) {
-    const pluralMapping: Record<string, DurationUnit> = {
+    const pluralMapping: { [key in DurationUnit]: NormalizedDurationUnit } = {
       year: "years",
       years: "years",
       quarter: "quarters",
@@ -298,7 +314,7 @@ export default class Duration {
       millisecond: "milliseconds",
       milliseconds: "milliseconds"
     };
-    const normalized = pluralMapping[unit ? unit.toLowerCase() : unit];
+    const normalized = pluralMapping[(unit ? unit.toLowerCase() : unit) as DurationUnit];
 
     if (!normalized) throw new InvalidUnitError(unit);
 
@@ -311,7 +327,7 @@ export default class Duration {
    * @return {boolean}
    */
   static isDuration(o: unknown): o is Duration {
-    return o && (o as Duration).isLuxonDuration;
+    return (o && (o as Duration).isLuxonDuration) || false;
   }
 
   /**
@@ -424,9 +440,9 @@ export default class Duration {
    * @param {Duration|Object|number} duration - The amount to add. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
    * @return {Duration}
    */
-  plus(duration: Duration | number | DurationObject) {
+  plus(duration: DurationLike) {
     const dur = friendlyDuration(duration),
-      result: DurationObject = {};
+      result: NormalizedDurationObject = {};
 
     for (const k of orderedUnits) {
       if (hasOwnProperty(dur.values, k) || hasOwnProperty(this.values, k)) {
@@ -442,7 +458,7 @@ export default class Duration {
    * @param {Duration|Object|number} duration - The amount to subtract. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
    * @return {Duration}
    */
-  minus(duration: Duration | number | DurationObject) {
+  minus(duration: DurationLike) {
     const dur = friendlyDuration(duration);
     return this.plus(dur.negate());
   }
@@ -472,7 +488,7 @@ export default class Duration {
   }
 
   /**
-   * "Set" the locale and/or numberingSystem. Returns a newly-constructed Duration.
+   * "Set" the locale and/or numberingSystem and/or conversionAccuracy. Returns a newly-constructed Duration.
    * @example dur.reconfigure({ locale: 'en-GB' })
    * @return {Duration}
    */
@@ -480,7 +496,7 @@ export default class Duration {
     const conf = {
       values: this.values,
       loc: this.loc.clone({ locale, numberingSystem }),
-      conversionAccuracy: conversionAccuracy || this.conversionAccuracy
+      conversionAccuracy: conversionAccuracy || this.conversionAccuracy()
     };
     return new Duration(conf);
   }
@@ -522,10 +538,10 @@ export default class Duration {
 
     units = units.map(u => Duration.normalizeUnit(u));
 
-    const built: DurationObject = {},
-      accumulated: DurationObject = {},
+    const built: NormalizedDurationObject = {},
+      accumulated: NormalizedDurationObject = {},
       vals = this.toObject();
-    let lastUnit!: DurationUnit;
+    let lastUnit!: NormalizedDurationUnit;
 
     normalizeValues(this.matrix, vals);
 
@@ -554,8 +570,14 @@ export default class Duration {
 
         // plus anything further down the chain that should be rolled up in to this
         for (const down in vals) {
-          if (orderedUnits.indexOf(down as DurationUnit) > orderedUnits.indexOf(k)) {
-            convert(this.matrix, vals, down as DurationUnit, built, k as ConversionMatrixUnit);
+          if (orderedUnits.indexOf(down as NormalizedDurationUnit) > orderedUnits.indexOf(k)) {
+            convert(
+              this.matrix,
+              vals,
+              down as NormalizedDurationUnit,
+              built,
+              k as ConversionMatrixUnit
+            );
           }
         }
         // otherwise, keep it in the wings to boil it later
@@ -567,13 +589,15 @@ export default class Duration {
     // anything leftover becomes the decimal for the last unit
     // lastUnit is defined here since units is not empty
     for (const key in accumulated) {
-      if (accumulated[key as DurationUnit] !== 0) {
+      if (accumulated[key as NormalizedDurationUnit] !== 0) {
         built[lastUnit] =
           (built[lastUnit] as number) +
           (key === lastUnit
             ? (accumulated[key] as number)
-            : (accumulated[key as DurationUnit] as number) /
-              (this.matrix[lastUnit as ConversionMatrixUnit][key as DurationUnit] as number));
+            : (accumulated[key as NormalizedDurationUnit] as number) /
+              (this.matrix[lastUnit as ConversionMatrixUnit][
+                key as NormalizedDurationUnit
+              ] as number));
       }
     }
 
@@ -586,9 +610,9 @@ export default class Duration {
    * @return {Duration}
    */
   negate() {
-    const negated: DurationObject = {};
+    const negated: NormalizedDurationObject = {};
     for (const k in this.values) {
-      negated[k as DurationUnit] = -(this.values[k as DurationUnit] as number);
+      negated[k as NormalizedDurationUnit] = -(this.values[k as NormalizedDurationUnit] as number);
     }
     return this.clone(negated, true);
   }
@@ -686,21 +710,26 @@ export default class Duration {
   }
 
   // clone really means "create another instance just like this one, but with these changes"
-  private clone(values: DurationObject, clear: boolean) {
+  private clone(values: NormalizedDurationObject, clear: boolean) {
     // deep merge for vals
     const conf = {
       values: clear ? values : Object.assign({}, this.values, values),
       loc: this.loc,
-      conversionAccuracy: this.conversionAccuracy
+      conversionAccuracy: this.conversionAccuracy()
     };
     return new Duration(conf);
   }
+
+  private conversionAccuracy() {
+    return (this.matrix === accurateMatrix ? "longterm" : "casual") as ConversionAccuracy;
+  }
 }
 
+export type DurationLike = Duration | DurationObject | number;
 /**
  * @private
  */
-export function friendlyDuration(durationish: unknown) {
+export function friendlyDuration(durationish: DurationLike | unknown) {
   if (isNumber(durationish)) {
     return Duration.fromMillis(durationish);
   } else if (Duration.isDuration(durationish)) {

@@ -54,15 +54,11 @@ export function hasRelative() {
 
 // OBJECTS AND ARRAYS
 
-export function maybeArray(thing: unknown) {
+export function maybeArray<T>(thing: T | T[]) {
   return Array.isArray(thing) ? thing : [thing];
 }
 
-export function bestBy<T, U>(
-  arr: T[],
-  by: (_: T) => U,
-  compare: (_: U, __: U) => U
-): T | undefined {
+export function bestBy<T, U>(arr: T[], by: (_: T) => U, compare: (_: U, __: U) => U) {
   const best = arr.reduce<[U, T] | undefined>((best, next) => {
     const pair: [U, T] = [by(next), next];
     if (best === undefined) {
@@ -74,7 +70,10 @@ export function bestBy<T, U>(
     }
   }, undefined);
 
-  return best === undefined ? undefined : best[1]; // GILLES in case arr is empty
+  // GILLES in case arr is empty
+  if (best === undefined) throw new InvalidArgumentError("bestBy expects a non empty array");
+
+  return best[1];
 }
 
 export function pick<T, K extends keyof T>(obj: T, keys: K[]) {
@@ -240,13 +239,13 @@ function asNumber(value: unknown) {
   return numericValue;
 }
 
-export function normalizeObject<T>(obj: T, normalizer: (key: string) => Extract<keyof T, string>) {
-  const normalized: Partial<Record<Extract<keyof T, string>, number>> = {};
+export function normalizeObject<T extends string>(obj: any, normalizer: (key: string) => T) {
+  const normalized: Partial<Record<T, number>> = {};
   for (const u in obj) {
     if (hasOwnProperty(obj, u)) {
-      const v = obj[u];
-      if (v === undefined || v === null) continue;
-      normalized[normalizer(u)] = asNumber(v);
+      const value = obj[u];
+      if (value === undefined || value === null) continue;
+      normalized[normalizer(u)] = asNumber(value);
     }
   }
   return normalized;

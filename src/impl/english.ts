@@ -2,7 +2,8 @@ import * as Formats from "./formats";
 import { pick } from "./util";
 import { UnitLength, StringUnitLength } from "../types/common";
 import DateTime from "../datetime";
-import { ToRelativeNumeric, ToRelativeUnit, DateTimeFormatOptions } from "src/types/datetime";
+import { ToRelativeNumeric, ToRelativeUnit, DateTimeFormatOptions } from "../types/datetime";
+import Duration from "../duration";
 
 function stringify(obj: Object) {
   return JSON.stringify(obj, Object.keys(obj).sort());
@@ -73,7 +74,7 @@ export const weekdaysShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export const weekdaysNarrow = ["M", "T", "W", "T", "F", "S", "S"];
 
-export function weekdays(length: UnitLength) {
+export function weekdays(length: StringUnitLength) {
   switch (length) {
     case "narrow":
       return weekdaysNarrow;
@@ -81,10 +82,6 @@ export function weekdays(length: UnitLength) {
       return weekdaysShort;
     case "long":
       return weekdaysLong;
-    case "numeric":
-      return ["1", "2", "3", "4", "5", "6", "7"];
-    case "2-digit": // GILLES added
-      return ["01", "02", "03", "04", "05", "06", "07"];
   }
 }
 
@@ -111,7 +108,7 @@ export function meridiemForDateTime(dt: DateTime) {
   return meridiems[dt.hour < 12 ? 0 : 1];
 }
 
-export function weekdayForDateTime(dt: DateTime, length: UnitLength) {
+export function weekdayForDateTime(dt: DateTime, length: StringUnitLength) {
   return weekdays(length)[dt.weekday - 1];
 }
 
@@ -129,7 +126,7 @@ export function formatRelativeTime(
   numeric: ToRelativeNumeric = "always",
   narrow = false
 ) {
-  const units: { [key in ToRelativeUnit]: [string, string] } = {
+  const units = {
     years: ["year", "yr."],
     quarters: ["quarter", "qtr."], // GILLES typo
     months: ["month", "mo."],
@@ -137,27 +134,29 @@ export function formatRelativeTime(
     days: ["day", "day"],
     hours: ["hour", "hr."],
     minutes: ["minute", "min."],
-    seconds: ["second", "sec."]
+    seconds: ["second", "sec."],
+    milliseconds: [] // never used
   };
 
+  const unitTexts = units[Duration.normalizeUnit(unit)];
   const lastable = ["hours", "minutes", "seconds"].indexOf(unit) === -1;
 
   if (numeric === "auto" && lastable) {
     const isDay = unit === "days";
     switch (count) {
       case 1:
-        return isDay ? "tomorrow" : `next ${units[unit][0]}`;
+        return isDay ? "tomorrow" : `next ${unitTexts[0]}`;
       case -1:
-        return isDay ? "yesterday" : `last ${units[unit][0]}`;
+        return isDay ? "yesterday" : `last ${unitTexts[0]}`;
       case 0:
-        return isDay ? "today" : `this ${units[unit][0]}`;
+        return isDay ? "today" : `this ${unitTexts[0]}`;
       default: // fall through
     }
   }
 
   const isInPast = Object.is(count, -0) || count < 0,
     formatValue = Math.abs(count),
-    formatUnit = narrow ? units[unit][1] : formatValue === 1 ? units[unit][0] : unit;
+    formatUnit = narrow ? unitTexts[1] : formatValue === 1 ? unitTexts[0] : unit;
   return isInPast ? `${formatValue} ${formatUnit} ago` : `in ${formatValue} ${formatUnit}`;
 }
 

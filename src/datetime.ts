@@ -1,4 +1,4 @@
-import Duration, { friendlyDuration } from "./duration";
+import Duration, { friendlyDuration, DurationLike } from "./duration";
 import Interval from "./interval";
 import Settings from "./settings";
 import Info from "./info";
@@ -18,7 +18,7 @@ import {
   normalizeObject,
   roundTo,
   objToLocalTS
-} from "./impl/util.js";
+} from "./impl/util";
 import { normalizeZone } from "./impl/zoneUtil";
 import diff from "./impl/diff";
 import { parseRFC2822Date, parseISODate, parseHTTPDate, parseSQL } from "./impl/regexParser";
@@ -33,7 +33,7 @@ import {
   hasInvalidOrdinalData,
   hasInvalidTimeData,
   UnitError
-} from "./impl/conversions.js";
+} from "./impl/conversions";
 import * as Formats from "./impl/formats";
 import {
   InvalidArgumentError,
@@ -43,7 +43,7 @@ import {
   MismatchedWeekdayError,
   UnparsableStringError,
   InvalidZoneError
-} from "./errors.js";
+} from "./errors";
 import SystemZone from "./zones/systemZone";
 import Zone from "./zone";
 import {
@@ -61,10 +61,12 @@ import {
   GenericDateTime,
   TimeObject,
   ToRelativeUnit,
-  ToRelativeNumeric
-} from "./types/datetime.js";
-import { DurationUnit, DurationObject } from "./types/duration";
+  ToRelativeNumeric,
+  DateTimeWithZoneOptions
+} from "./types/datetime";
+import { DurationUnit } from "./types/duration";
 import { LocaleOptions } from "./types/locale";
+import { ThrowOnInvalid } from "./types/common";
 
 const MAX_DATE = 8.64e15;
 
@@ -122,21 +124,18 @@ function objToTS(obj: GregorianDateTime, offset: number, zone: Zone) {
 function parseDataToDateTime(
   parsed: GenericDateTime | null,
   parsedZone: Zone | null,
-  options: DateTimeOptions,
+  options: DateTimeWithZoneOptions,
   format: string,
   text: string
 ) {
   const { setZone, zone } = options;
   if (parsed && Object.keys(parsed).length !== 0) {
     const interpretationZone = parsedZone || zone,
-      inst = DateTime.fromObject(
-        parsed,
-        Object.assign({}, options, {
-          zone: interpretationZone,
-          // setZone is a valid option in the calling methods, but not in fromObject
-          setZone: undefined
-        })
-      );
+      opts = Object.assign({}, options, {
+        zone: interpretationZone,
+        setZone: undefined
+      }),
+      inst = DateTime.fromObject(parsed, opts);
     if (inst !== null) return setZone ? inst : inst.setZone(zone || "default"); // GILLES in case zone is not set
   }
   if (options.nullOnInvalid) return null;
@@ -337,7 +336,7 @@ export default class DateTime {
   private ts: Readonly<number>;
   private _zone: Readonly<Zone>;
   private loc: Locale;
-  private weekData: WeekDateTime | null;
+  private weekData: WeekDateTime | undefined;
   private c: Readonly<GregorianDateTime>;
   private o: Readonly<number>;
   private isLuxonDateTime: Readonly<true>;
@@ -373,7 +372,7 @@ export default class DateTime {
     /**
      * @access private
      */
-    this.weekData = null;
+    this.weekData = undefined;
     /**
      * @access private
      */
@@ -407,18 +406,13 @@ export default class DateTime {
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
    * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
    * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @return {DateTime}
    */
-  static local(
-    _year?: number,
-    _month?: number,
-    _day?: number,
-    _hour?: number,
-    _minute?: number,
-    _second?: number,
-    _millisecond?: number,
-    _options?: DateTimeOptions
-  ) {
+  static local(..._args: number[]): DateTime;
+  static local(..._args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
+  static local(..._args: (number | DateTimeOptions)[]): DateTime | null;
+  static local(..._args: (number | DateTimeOptions)[]) {
     const [options, args] = lastOpts(arguments),
       [year, month, day, hour, minute, second, millisecond] = args;
     return DateTime.quickDT({ year, month, day, hour, minute, second, millisecond }, options);
@@ -437,6 +431,7 @@ export default class DateTime {
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
    * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
    * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.utc()                                               //~> now
    * @example DateTime.utc(2017)                                           //~> 2017-01-01T00:00:00Z
    * @example DateTime.utc(2017, 3)                                        //~> 2017-03-01T00:00:00Z
@@ -448,16 +443,10 @@ export default class DateTime {
    * @example DateTime.utc(2017, 3, 12, 5, 45, 10, 765, { locale: "fr")    //~> 2017-03-12T05:45:10.765Z with a French locale
    * @return {DateTime}
    */
-  static utc(
-    _year?: number,
-    _month?: number,
-    _day?: number,
-    _hour?: number,
-    _minute?: number,
-    _second?: number,
-    _millisecond?: number,
-    _options?: DateTimeOptions
-  ) {
+  static utc(..._args: number[]): DateTime;
+  static utc(..._args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
+  static utc(..._args: (number | DateTimeOptions)[]): DateTime | null;
+  static utc(..._args: (number | DateTimeOptions)[]) {
     const [options, args] = lastOpts(arguments),
       [year, month, day, hour, minute, second, millisecond] = args;
 
@@ -470,8 +459,15 @@ export default class DateTime {
    * @param {Date} date - a Javascript Date object
    * @param {Object} options - configuration options for the DateTime
    * @param {string|Zone} [options.zone='default'] - the zone to place the DateTime into
+   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
+   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
+   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @return {DateTime}
    */
+  static fromJSDate(date: Date): DateTime;
+  static fromJSDate(date: Date, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromJSDate(date: Date, options: DateTimeOptions): DateTime | null;
   static fromJSDate(date: Date, options: DateTimeOptions = {}) {
     if (!isDate(date) || Number.isNaN(date.valueOf())) {
       if (options.nullOnInvalid) return null;
@@ -493,8 +489,12 @@ export default class DateTime {
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
    * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
    * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @return {DateTime}
    */
+  static fromMillis(milliseconds: number): DateTime;
+  static fromMillis(milliseconds: number, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromMillis(milliseconds: number, options: DateTimeOptions): DateTime | null;
   static fromMillis(milliseconds: number, options: DateTimeOptions = {}) {
     if (!isNumber(milliseconds)) {
       if (options.nullOnInvalid) return null;
@@ -521,8 +521,12 @@ export default class DateTime {
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
    * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
    * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @return {DateTime}
    */
+  static fromSeconds(seconds: number): DateTime;
+  static fromSeconds(seconds: number, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromSeconds(seconds: number, options: DateTimeOptions): DateTime | null;
   static fromSeconds(seconds: number, options: DateTimeOptions = {}) {
     if (!isNumber(seconds)) {
       if (options.nullOnInvalid) return null;
@@ -550,10 +554,11 @@ export default class DateTime {
    * @param {number} obj.minute - minute of the hour, 0-59
    * @param {number} obj.second - second of the minute, 0-59
    * @param {number} obj.millisecond - millisecond of the second, 0-999
-   * @param {string|Zone} [obj.zone='default'] - interpret the numbers in the context of a particular zone. Can take any value taken as the first argument to setZone()
-   * @param {string} [obj.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} obj.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} obj.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {Object} options - configuration options for the DateTime
+   * @param {string|Zone} [options.zone='default'] - the zone to place the DateTime into
+   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
+   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
+   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
    * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @example DateTime.fromObject({ year: 1982, month: 5, day: 25}).toISODate() //=> '1982-05-25'
    * @example DateTime.fromObject({ year: 1982 }).toISODate() //=> '1982-01-01'
@@ -564,6 +569,9 @@ export default class DateTime {
    * @example DateTime.fromObject({ weekYear: 2016, weekNumber: 2, weekday: 3 }).toISODate() //=> '2016-01-13'
    * @return {DateTime}
    */
+  static fromObject(object: GenericDateTime): DateTime;
+  static fromObject(object: GenericDateTime, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromObject(object: GenericDateTime, options: DateTimeOptions): DateTime | null;
   static fromObject(object: GenericDateTime, options: DateTimeOptions = {}) {
     const zoneToUse = normalizeZone(options.zone, Settings.defaultZone);
     if (!zoneToUse.isValid) {
@@ -673,7 +681,10 @@ export default class DateTime {
    * @example DateTime.fromISO('2016-W05-4')
    * @return {DateTime}
    */
-  static fromISO(text: string, options: DateTimeOptions = {}) {
+  static fromISO(text: string): DateTime;
+  static fromISO(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromISO(text: string, options: DateTimeWithZoneOptions): DateTime | null;
+  static fromISO(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseISODate(text);
     return parseDataToDateTime(vals, parsedZone, options, "ISO 8601", text);
   }
@@ -693,7 +704,10 @@ export default class DateTime {
    * @example DateTime.fromRFC2822('25 Nov 2016 13:23 Z')
    * @return {DateTime}
    */
-  static fromRFC2822(text: string, options: DateTimeOptions = {}) {
+  static fromRFC2822(text: string): DateTime;
+  static fromRFC2822(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromRFC2822(text: string, options: DateTimeWithZoneOptions): DateTime | null;
+  static fromRFC2822(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseRFC2822Date(text);
     return parseDataToDateTime(vals, parsedZone, options, "RFC 2822", text);
   }
@@ -714,7 +728,10 @@ export default class DateTime {
    * @example DateTime.fromHTTP('Sun Nov  6 08:49:37 1994')
    * @return {DateTime}
    */
-  static fromHTTP(text: string, options: DateTimeOptions = {}) {
+  static fromHTTP(text: string): DateTime;
+  static fromHTTP(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromHTTP(text: string, options: DateTimeWithZoneOptions): DateTime | null;
+  static fromHTTP(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseHTTPDate(text);
     return parseDataToDateTime(vals, parsedZone, options, "HTTP", text);
   }
@@ -729,12 +746,23 @@ export default class DateTime {
    * @param {string|Zone} [options.zone='default'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
    * @param {boolean} [options.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
    * @param {string} [options.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
-   * @param {string} options.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
    * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
+   * @param {string} options.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
    * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @return {DateTime}
    */
-  static fromFormat(text: string, format: string, options: DateTimeOptions = {}) {
+  static fromFormat(text: string, format: string): DateTime;
+  static fromFormat(
+    text: string,
+    format: string,
+    options: DateTimeWithZoneOptions & ThrowOnInvalid
+  ): DateTime;
+  static fromFormat(
+    text: string,
+    format: string,
+    options: DateTimeWithZoneOptions
+  ): DateTime | null;
+  static fromFormat(text: string, format: string, options: DateTimeWithZoneOptions = {}) {
     if (isUndefined(text) || isUndefined(format)) {
       if (options.nullOnInvalid) return null;
       throw new InvalidArgumentError("fromFormat requires an input string and a format");
@@ -772,8 +800,9 @@ export default class DateTime {
    * @param {string|Zone} [options.zone='default'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
    * @param {boolean} [options.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
    * @param {string} [options.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
-   * @param {string} options.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
    * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
+   * @param {string} options.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
+   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.fromSQL('2017-05-15')
    * @example DateTime.fromSQL('2017-05-15 09:12:34')
    * @example DateTime.fromSQL('2017-05-15 09:12:34.342')
@@ -784,7 +813,10 @@ export default class DateTime {
    * @example DateTime.fromSQL('09:12:34.342')
    * @return {DateTime}
    */
-  static fromSQL(text: string, options: DateTimeOptions = {}) {
+  static fromSQL(text: string): DateTime;
+  static fromSQL(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromSQL(text: string, options: DateTimeWithZoneOptions): DateTime | null;
+  static fromSQL(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseSQL(text);
     return parseDataToDateTime(vals, parsedZone, options, "SQL", text);
   }
@@ -795,7 +827,7 @@ export default class DateTime {
    * @return {boolean}
    */
   static isDateTime(o: unknown): o is DateTime {
-    return o && (o as DateTime).isLuxonDateTime;
+    return (o && (o as DateTime).isLuxonDateTime) || false;
   }
 
   // INFO
@@ -807,7 +839,7 @@ export default class DateTime {
    * @example DateTime.local(2017, 7, 4).get('day'); //=> 4
    * @return {number}
    */
-  get(unit: keyof GregorianDateTime) {
+  get(unit: keyof GenericDateTime) {
     return this[unit];
   }
 
@@ -1249,7 +1281,7 @@ export default class DateTime {
    * @example DateTime.local().plus(Duration.fromObject({ hours: 3, minutes: 13 })) //~> in 3 hr, 13 min
    * @return {DateTime}
    */
-  plus(duration: Duration | number | DurationObject) {
+  plus(duration: DurationLike) {
     const dur = friendlyDuration(duration);
     return this.clone(this.adjustTime(dur));
   }
@@ -1260,7 +1292,7 @@ export default class DateTime {
    * @param {Duration|Object|number} duration - The amount to subtract. Either a Luxon Duration, a number of milliseconds, the object argument to Duration.fromObject()
    @return {DateTime}
   */
-  minus(duration: Duration | number | DurationObject) {
+  minus(duration: DurationLike) {
     const dur = friendlyDuration(duration).negate();
     return this.clone(this.adjustTime(dur));
   }
@@ -1628,7 +1660,7 @@ export default class DateTime {
    */
   diffNow(unit: DurationUnit | DurationUnit[] = "milliseconds", options: DiffOptions = {}) {
     const local = DateTime.local();
-    return this.diff(local as DateTime, unit, options);
+    return this.diff(local, unit, options);
   }
 
   /**
@@ -1691,7 +1723,7 @@ export default class DateTime {
    * @example DateTime.local().minus({ hours: 36 }).toRelative({ round: false }) //=> "1.5 days ago"
    */
   toRelative(options: ToRelativeOptions = {}) {
-    const base = options.base || (DateTime.fromObject({}, { zone: this.zone }) as DateTime);
+    const base = options.base || DateTime.fromObject({}, { zone: this.zone });
     const padding = options.padding ? (this < base ? -options.padding : options.padding) : 0;
     return DateTime.diffRelative(
       base,
@@ -1719,7 +1751,7 @@ export default class DateTime {
    */
   toRelativeCalendar(options: ToRelativeCalendarOptions = {}) {
     return DateTime.diffRelative(
-      options.base || (DateTime.fromObject({}, { zone: this.zone }) as DateTime),
+      options.base || DateTime.fromObject({}, { zone: this.zone }),
       this,
       Object.assign(options, {
         numeric: "auto" as const,
@@ -1732,24 +1764,30 @@ export default class DateTime {
   /**
    * Return the min of several date times
    * @param {...DateTime} dateTimes - the DateTimes from which to choose the minimum
-   * @return {DateTime} the min DateTime, or undefined if called with no argument
+   * @return {DateTime} the min DateTime, or undefined if called with no arguments
    */
+  static min(): undefined;
+  static min(...dateTimes: DateTime[]): DateTime;
   static min(...dateTimes: DateTime[]) {
     if (!dateTimes.every(DateTime.isDateTime)) {
       throw new InvalidArgumentError("min requires all arguments be DateTimes");
     }
+    if (dateTimes.length === 0) return undefined;
     return bestBy(dateTimes, i => i.valueOf(), Math.min);
   }
 
   /**
    * Return the max of several date times
    * @param {...DateTime} dateTimes - the DateTimes from which to choose the maximum
-   * @return {DateTime} the max DateTime, or undefined if called with no argument
+   * @return {DateTime} the max DateTime, or undefined if called with no arguments
    */
+  static max(): undefined;
+  static max(...dateTimes: DateTime[]): DateTime;
   static max(...dateTimes: DateTime[]) {
     if (!dateTimes.every(DateTime.isDateTime)) {
       throw new InvalidArgumentError("max requires all arguments be DateTimes");
     }
+    if (dateTimes.length === 0) return undefined;
     return bestBy(dateTimes, i => i.valueOf(), Math.max);
   }
 
@@ -1948,7 +1986,7 @@ export default class DateTime {
   //*******************************//
   // we cache week data on the DT object and this intermediates the cache
   private possiblyCachedWeekData() {
-    if (this.weekData === null) {
+    if (this.weekData === undefined) {
       this.weekData = gregorianToWeek(this.c);
     }
     return this.weekData;
@@ -2086,12 +2124,13 @@ export default class DateTime {
 /**
  * @private
  */
-export function friendlyDateTime(dateTimeish: any) {
+export type DateTimeLike = DateTime | Date | GenericDateTime;
+export function friendlyDateTime(dateTimeish: DateTimeLike | unknown) {
   if (DateTime.isDateTime(dateTimeish)) {
     return dateTimeish;
-  } else if (dateTimeish && dateTimeish.valueOf && isNumber(dateTimeish.valueOf())) {
-    return DateTime.fromJSDate(dateTimeish);
-  } else if (dateTimeish && typeof dateTimeish === "object") {
+  } else if (typeof dateTimeish === "object" && dateTimeish) {
+    // GILLES date included here in object
+    if (isNumber(dateTimeish.valueOf())) return DateTime.fromJSDate(dateTimeish as Date);
     return DateTime.fromObject(dateTimeish);
   } else {
     throw new InvalidArgumentError(

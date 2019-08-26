@@ -6,7 +6,7 @@ import Formatter from "./formatter";
 
 import { StringUnitLength, UnitLength } from "../types/common";
 import { LocaleOptions, NumberingSystem, CalendarSystem } from "../types/locale";
-import { ToRelativeUnit, DateTimeFormatOptions } from "src/types/datetime";
+import { ToRelativeUnit, DateTimeFormatOptions } from "../types/datetime";
 
 let intlDTCache: Record<string, Intl.DateTimeFormat> = {};
 function getCachedDTF(locString: string, options: DateTimeFormatOptions = {}) {
@@ -112,7 +112,7 @@ function intlConfigString(
 function mapMonths<T>(f: (_: DateTime) => T): T[] {
   const ms = [];
   for (let i = 1; i <= 12; i++) {
-    const dt = DateTime.utc(2016, i, 1) as DateTime;
+    const dt = DateTime.utc(2016, i, 1);
     ms.push(f(dt));
   }
   return ms;
@@ -121,7 +121,7 @@ function mapMonths<T>(f: (_: DateTime) => T): T[] {
 function mapWeekdays<T>(f: (_: DateTime) => T): T[] {
   const ms = [];
   for (let i = 1; i <= 7; i++) {
-    const dt = DateTime.utc(2016, 11, 13 + i) as DateTime;
+    const dt = DateTime.utc(2016, 11, 13 + i);
     ms.push(f(dt));
   }
   return ms;
@@ -211,10 +211,7 @@ class PolyDateFormatter {
       if (options.timeZoneName) {
         this.dt = dt;
       } else {
-        this.dt =
-          dt.offset === 0
-            ? dt
-            : (DateTime.fromMillis(dt.toMillis() + dt.offset * 60 * 1000) as DateTime);
+        this.dt = dt.offset === 0 ? dt : DateTime.fromMillis(dt.toMillis() + dt.offset * 60 * 1000);
       }
     } else if (dt.zone.type === "system") {
       this.dt = dt;
@@ -476,7 +473,7 @@ export default class Locale {
         if (this.meridiemCache === undefined) {
           const intl = { hour: "numeric", hour12: true };
           this.meridiemCache = [DateTime.utc(2016, 11, 13, 9), DateTime.utc(2016, 11, 13, 19)].map(
-            dt => this.extract(dt as DateTime, intl, "dayPeriod") // GILLES capital P
+            dt => this.extract(dt, intl, "dayPeriod") // GILLES capital P
           );
         }
 
@@ -495,7 +492,7 @@ export default class Locale {
         this.eraCache.set(
           len,
           [DateTime.utc(-40, 1, 1), DateTime.utc(2017, 1, 1)].map(dt =>
-            this.extract(dt as DateTime, intl, "era")
+            this.extract(dt, intl, "era")
           )
         );
       }
@@ -507,7 +504,10 @@ export default class Locale {
   extract(dt: DateTime, intlOpts: DateTimeFormatOptions, field: Intl.DateTimeFormatPartTypes) {
     const df = this.dtFormatter(dt, intlOpts),
       results = df.formatToParts(),
-      matching = results.find((m: Intl.DateTimeFormatPart) => m.type.toLowerCase() === field);
+      // GILLES compare in lower case, type is 'dayperiod' instead of 'dayPeriod'
+      matching = results.find(
+        (m: Intl.DateTimeFormatPart) => m.type.toLowerCase() === field.toLowerCase()
+      );
 
     return matching ? matching.value : ""; // should never happen // GILLES
   }

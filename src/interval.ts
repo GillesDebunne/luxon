@@ -1,8 +1,8 @@
-import DateTime, { friendlyDateTime } from "./datetime";
-import Duration, { friendlyDuration } from "./duration";
+import DateTime, { friendlyDateTime, DateTimeLike } from "./datetime";
+import Duration, { friendlyDuration, DurationLike } from "./duration";
 import { InvalidArgumentError, UnparsableStringError } from "./errors";
-import { GenericDateTime, DateTimeOptions, ToISOTimeOptions, DiffOptions } from "./types/datetime";
-import { DurationUnit, DurationObject } from "./types/duration";
+import { ToISOTimeOptions, DiffOptions, DateTimeWithZoneOptions } from "./types/datetime";
+import { DurationUnit } from "./types/duration";
 import { IntervalObject } from "./types/interval";
 
 // checks if the start is equal to or before the end
@@ -67,10 +67,7 @@ export default class Interval {
    * @param {DateTime|Date|Object} end
    * @return {Interval}
    */
-  static fromDateTimes(
-    start: DateTime | Date | GenericDateTime,
-    end: DateTime | Date | GenericDateTime
-  ) {
+  static fromDateTimes(start: DateTimeLike, end: DateTimeLike) {
     const builtStart = friendlyDateTime(start),
       builtEnd = friendlyDateTime(end);
 
@@ -86,7 +83,7 @@ export default class Interval {
    * @param {Duration|Object|number} duration - the length of the Interval.
    * @return {Interval}
    */
-  static after(start: DateTime | Date | GenericDateTime, duration: Duration) {
+  static after(start: DateTimeLike, duration: DurationLike) {
     const dur = friendlyDuration(duration),
       dt = friendlyDateTime(start);
 
@@ -102,7 +99,7 @@ export default class Interval {
    * @param {Duration|Object|number} duration - the length of the Interval.
    * @return {Interval}
    */
-  static before(end: DateTime | Date | GenericDateTime, duration: Duration) {
+  static before(end: DateTimeLike, duration: DurationLike) {
     const dur = friendlyDuration(duration),
       dt = friendlyDateTime(end);
 
@@ -120,7 +117,7 @@ export default class Interval {
    * @see https://en.wikipedia.org/wiki/ISO_8601#Time_intervals
    * @return {Interval}
    */
-  static fromISO(text: string, options: DateTimeOptions) {
+  static fromISO(text: string, options: DateTimeWithZoneOptions = {}) {
     const [s, e] = (text || "").split("/", 2);
     const realOpts = Object.assign({}, options, { nullOnInvalid: true });
     if (s && e) {
@@ -153,7 +150,7 @@ export default class Interval {
    * @return {boolean}
    */
   static isInterval(o: unknown): o is Interval {
-    return o && (o as Interval).isLuxonInterval;
+    return (o && (o as Interval).isLuxonInterval) || false;
   }
 
   /**
@@ -254,7 +251,7 @@ export default class Interval {
    * @param {...[DateTime]} dateTimes - the unit of time to count.
    * @return {[Interval]}
    */
-  splitAt(...dateTimes: DateTime[]) {
+  splitAt(...dateTimes: (DateTimeLike)[]) {
     const sorted = dateTimes.map(friendlyDateTime).sort(),
       results = [];
     let { s } = this,
@@ -277,7 +274,7 @@ export default class Interval {
    * @param {Duration|Object|number} duration - The length of each resulting interval.
    * @return {[Interval]}
    */
-  splitBy(duration: Duration | DurationObject | number) {
+  splitBy(duration: DurationLike) {
     const dur = friendlyDuration(duration);
 
     if (dur.as("milliseconds") === 0) {
@@ -469,7 +466,7 @@ export default class Interval {
    * @param {Object} options - The same options as {@link DateTime.toISO}
    * @return {string}
    */
-  toISO(options: ToISOTimeOptions) {
+  toISO(options: ToISOTimeOptions = {}) {
     return `${this.s.toISO(options)}/${this.e.toISO(options)}`;
   }
 
@@ -480,8 +477,8 @@ export default class Interval {
    * @param {string} [options.separator =  ' – '] - a separator to place between the start and end representations
    * @return {string}
    */
-  toFormat(dateFormat: string, { separator = " – " }) {
-    return `${this.s.toFormat(dateFormat)}${separator}${this.e.toFormat(dateFormat)}`;
+  toFormat(dateFormat: string, options = { separator: " – " }) {
+    return `${this.s.toFormat(dateFormat)}${options.separator}${this.e.toFormat(dateFormat)}`;
   }
 
   /**
@@ -496,7 +493,7 @@ export default class Interval {
    * @example Interval.fromDateTimes(dt1, dt2).toDuration('seconds').toObject() //=> { seconds: 88489.257 }
    * @return {Duration}
    */
-  toDuration(unit: DurationUnit | DurationUnit[], options: DiffOptions = {}) {
+  toDuration(unit: DurationUnit | DurationUnit[] = "milliseconds", options: DiffOptions = {}) {
     return this.e.diff(this.s, unit, options);
   }
 

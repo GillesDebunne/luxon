@@ -2,8 +2,8 @@ import { ConversionAccuracy, StringUnitLength } from "./common";
 import { NumberingSystem, LocaleOptions } from "./locale";
 import DateTime from "../datetime";
 import Zone from "../zone";
-import { DurationObject } from "./duration";
-import { FormatToken } from "src/impl/formatter";
+import { DurationUnit } from "./duration";
+import { FormatToken } from "../impl/formatter";
 
 export type DateTimeFormatOptions = Intl.DateTimeFormatOptions;
 
@@ -11,7 +11,7 @@ export interface ZoneOptions {
   keepLocalTime?: boolean;
 }
 
-export type ToRelativeUnit = keyof Omit<DurationObject, "milliseconds">;
+export type ToRelativeUnit = Exclude<DurationUnit, "millisecond" | "milliseconds">;
 
 export interface ToRelativeOptions {
   /** The DateTime to use as the basis to which this time is compared. Defaults to now. */
@@ -59,8 +59,11 @@ export interface ToISOTimeOptions {
 
 export interface DateTimeOptions extends LocaleOptions {
   zone?: string | Zone;
-  setZone?: boolean;
   nullOnInvalid?: boolean;
+}
+
+export interface DateTimeWithZoneOptions extends DateTimeOptions {
+  setZone?: boolean;
 }
 
 export interface TimeObject {
