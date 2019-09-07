@@ -125,7 +125,7 @@ async function buildLibrary(dest, opts) {
   console.log("Built", dest);
 }
 
-const browsersOld = "last 2 major versions";
+const browsersOld = [">0.25%", "not op_mini all"];
 
 async function global() {
   await buildLibrary("global", {

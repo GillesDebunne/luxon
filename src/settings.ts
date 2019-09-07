@@ -4,10 +4,10 @@ import Locale from "./impl/locale";
 
 import { normalizeZone } from "./impl/zoneUtil";
 import { NumberingSystem, CalendarSystem } from "./types/locale";
-import { ZoneParameter } from "./types/zone";
+import { ZoneLike } from "./types/zone";
 
 let now = () => Date.now(),
-  defaultZone: ZoneParameter | undefined,
+  defaultZone: ZoneLike | undefined,
   defaultLocale: string | undefined,
   defaultNumberingSystem: NumberingSystem | undefined,
   defaultOutputCalendar: CalendarSystem | undefined;
@@ -40,7 +40,7 @@ export default class Settings {
    * Use the value "system" to reset this value to the system's time zone.
    * @type {Zone | string | number | undefined}
    */
-  static setDefaultZone(zone?: ZoneParameter) {
+  static setDefaultZone(zone?: ZoneLike) {
     // GILLES change API !!!
     defaultZone = zone;
   }

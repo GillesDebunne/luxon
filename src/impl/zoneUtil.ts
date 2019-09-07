@@ -9,9 +9,9 @@ import InvalidZone from "../zones/invalidZone";
 import SystemZone from "../zones/systemZone";
 
 import { isUndefined, isString, isNumber } from "./util";
-import { ZoneParameter } from "../types/zone";
+import { ZoneLike } from "../types/zone";
 
-export function normalizeZone(input: ZoneParameter, defaultZone: Zone) {
+export function normalizeZone(input: ZoneLike, defaultZone: Zone) {
   if (isUndefined(input) || input === null) return defaultZone;
   if (input instanceof Zone) return input;
   if (isString(input)) {

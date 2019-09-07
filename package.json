@@ -30,7 +30,7 @@
     }
   },
   "lint-staged": {
-    "*.{js,json}": [
+    "*.{ts,js,json}": [
       "prettier --write",
       "git add"
     ]
@@ -79,6 +79,7 @@
     "uglify-js": "latest"
   },
   "main": "build/node/luxon.js",
+  "types": "build/node/luxon.d.ts",
   "module": "src/luxon.js",
   "browser": "build/cjs-browser/luxon.js",
   "jsdelivr": "build/global/luxon.min.js",

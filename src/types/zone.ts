@@ -7,4 +7,4 @@ export interface ZoneOffsetOptions {
 
 export type ZoneOffsetFormat = "narrow" | "short" | "techie";
 
-export type ZoneParameter = Zone | number | string | null | undefined;
+export type ZoneLike = Zone | number | string | null | undefined;

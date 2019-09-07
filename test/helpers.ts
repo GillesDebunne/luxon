@@ -1,7 +1,7 @@
 /* eslint no-global-assign: "off" */
 import { DateTime, Settings, Duration } from "../src/luxon";
 import { NumberingSystem, CalendarSystem } from "src/types/locale";
-import { ZoneParameter } from "src/types/zone";
+import { ZoneLike } from "src/types/zone";
 import { ConversionAccuracy } from "src/types/common";
 
 const withoutIntl = function(name: string, f: Function) {
@@ -86,7 +86,7 @@ const withNow = function(name: string, dt: DateTime, f: Function) {
   });
 };
 
-const withDefaultZone = function(zone: ZoneParameter, f: Function) {
+const withDefaultZone = function(zone: ZoneLike, f: Function) {
   const previousDefaultZone = Settings.defaultZone;
   try {
     Settings.setDefaultZone(zone);
