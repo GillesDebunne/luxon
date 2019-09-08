@@ -87,8 +87,8 @@ export default class FixedOffsetZone extends Zone {
   }
 
   /** @override **/
-  equals(otherZone: Zone): boolean {
-    return otherZone.type === "fixed" && (otherZone as FixedOffsetZone).fixed === this.fixed;
+  equals(other: Zone): boolean {
+    return other.type === "fixed" && (other as FixedOffsetZone).fixed === this.fixed;
   }
 
   /** @override **/

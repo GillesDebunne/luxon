@@ -38,7 +38,7 @@ export default class SystemZone extends Zone {
   }
 
   /** @override **/
-  offsetName(ts: number, { format, locale }: ZoneOffsetOptions) {
+  offsetName(ts: number, { format, locale }: ZoneOffsetOptions = {}) {
     return parseZoneInfo(ts, format, locale);
   }
 
@@ -53,8 +53,8 @@ export default class SystemZone extends Zone {
   }
 
   /** @override **/
-  equals(otherZone: Zone) {
-    return otherZone.type === "system";
+  equals(other: Zone) {
+    return other.type === "system";
   }
 
   /** @override **/

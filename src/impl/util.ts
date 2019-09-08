@@ -186,7 +186,12 @@ export function untruncateYear(year: number) {
 
 // PARSING
 
-export function parseZoneInfo(ts: number, offsetFormat: string, locale: string, timeZone?: string) {
+export function parseZoneInfo(
+  ts: number,
+  offsetFormat?: string,
+  locale?: string,
+  timeZone?: string
+) {
   const date = new Date(ts),
     intlOpts = {
       hour12: false,

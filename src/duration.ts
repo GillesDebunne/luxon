@@ -196,7 +196,7 @@ export default class Duration {
   /**
    * @private
    */
-  constructor(config: Config) {
+  private constructor(config: Config) {
     const accurate = config.conversionAccuracy === "longterm" || false;
     /**
      * @access private

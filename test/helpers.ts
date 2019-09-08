@@ -13,6 +13,7 @@ const withoutIntl = function(name: string, f: Function) {
       Settings.resetCaches();
       f();
     } finally {
+      Settings.resetCaches();
       // @ts-ignore
       Intl = intl;
     }
@@ -28,6 +29,7 @@ const withoutFTP = function(name: string, f: Function) {
       Settings.resetCaches();
       f();
     } finally {
+      Settings.resetCaches();
       Intl.DateTimeFormat.prototype.formatToParts = formatToParts;
     }
   });
@@ -43,6 +45,7 @@ const withoutRTF = function(name: string, f: Function) {
       Settings.resetCaches();
       f();
     } finally {
+      Settings.resetCaches();
       Intl.RelativeTimeFormat = rtf;
     }
   });
@@ -66,6 +69,7 @@ const withoutZones = function(name: string, f: Function) {
       Settings.resetCaches();
       f();
     } finally {
+      Settings.resetCaches();
       Intl.DateTimeFormat = DateTimeFormat;
     }
   });

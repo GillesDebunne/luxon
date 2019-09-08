@@ -65,7 +65,7 @@ import {
   DateTimeWithZoneOptions
 } from "./types/datetime";
 import { DurationUnit } from "./types/duration";
-import { LocaleOptions } from "./types/locale";
+import { LocaleOptions, NumberingSystem, CalendarSystem } from "./types/locale";
 import { ThrowOnInvalid } from "./types/common";
 
 const MAX_DATE = 8.64e15;
@@ -1142,11 +1142,13 @@ export default class DateTime {
    * @return {Object}
    */
   resolvedLocaleOpts(options: LocaleOptions & DateTimeFormatOptions = {}) {
-    const { locale, numberingSystem, calendar } = Formatter.create(
+    const { locale, numberingSystem: ns, calendar } = Formatter.create(
       this.loc.clone(options),
       options
     ).resolvedOptions(this);
-    return { locale, numberingSystem, outputCalendar: calendar };
+    const numberingSystem = ns as NumberingSystem;
+    const outputCalendar = calendar as CalendarSystem;
+    return { locale, numberingSystem, outputCalendar };
   }
 
   // TRANSFORM
@@ -1214,7 +1216,7 @@ export default class DateTime {
 
   /**
    * "Set" the locale, numberingSystem, or outputCalendar. Returns a newly-constructed DateTime.
-   * @param {Object} options - the options to set
+   * @param {Object} [options] - the options to set
    * @param {string} [options.locale] - ;
    * @param {CalendarSystem} [options.outputCalendar] - ;
    * @param {NumberingSystem} [options.numberingSystem] - ;
@@ -1618,7 +1620,7 @@ export default class DateTime {
 
   /**
    * Return the difference between two DateTimes as a Duration.
-   * @param {DateTime} otherDateTime - the DateTime to compare this one to
+   * @param {DateTime} other - the DateTime to compare this one to
    * @param {string|string[]} [unit=['milliseconds']] - the unit or array of units (such as 'hours' or 'days') to include in the duration.
    * @param {Object} options - options that affect the creation of the Duration
    * @param {string} [options.conversionAccuracy='casual'] - the conversion system to use
@@ -1632,7 +1634,7 @@ export default class DateTime {
    * @return {Duration}
    */
   diff(
-    otherDateTime: DateTime,
+    other: DateTime,
     unit: DurationUnit | DurationUnit[] = "milliseconds",
     options: DiffOptions = {}
   ) {
@@ -1646,9 +1648,9 @@ export default class DateTime {
     // GILLES added this test, for an invariant used in diff()
     if (units.length === 0) throw new InvalidArgumentError("At least one unit must be specified");
 
-    const otherIsLater = otherDateTime.valueOf() > this.valueOf(),
-      earlier = otherIsLater ? this : otherDateTime,
-      later = otherIsLater ? otherDateTime : this,
+    const otherIsLater = other.valueOf() > this.valueOf(),
+      earlier = otherIsLater ? this : other,
+      later = otherIsLater ? other : this,
       diffed = diff(earlier, later, units, durOpts);
 
     return otherIsLater ? diffed.negate() : diffed;
@@ -1669,26 +1671,26 @@ export default class DateTime {
 
   /**
    * Return an Interval spanning between this DateTime and another DateTime
-   * @param {DateTime} otherDateTime - the other end point of the Interval
+   * @param {DateTime} other - the other end point of the Interval
    * @return {Interval}
    */
-  until(otherDateTime: DateTime) {
-    return Interval.fromDateTimes(this, otherDateTime);
+  until(other: DateTime) {
+    return Interval.fromDateTimes(this, other);
   }
 
   /**
    * Return whether this DateTime is in the same unit of time as another DateTime
-   * @param {DateTime} otherDateTime - the other DateTime
+   * @param {DateTime} other - the other DateTime
    * @param {string} unit - the unit of time to check sameness on
    * @example DateTime.local().hasSame(otherDT, 'day'); //~> true if both have the same calendar day
    * @return {boolean}
    */
-  hasSame(otherDateTime: DateTime, unit: DurationUnit) {
+  hasSame(other: DateTime, unit: DurationUnit) {
     if (Duration.normalizeUnit(unit) === "milliseconds") {
       // GILLES added normalizeUnit
-      return this.valueOf() === otherDateTime.valueOf();
+      return this.valueOf() === other.valueOf();
     } else {
-      const inputMs = otherDateTime.valueOf();
+      const inputMs = other.valueOf();
       return this.startOf(unit).valueOf() <= inputMs && inputMs <= this.endOf(unit).valueOf();
     }
   }

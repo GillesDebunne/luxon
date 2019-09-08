@@ -75,7 +75,7 @@ test("Info.normalizeZone returns Zone objects unchanged", () => {
   const fixedOffsetZone = FixedOffsetZone.instance(5);
   expect(Info.normalizeZone(fixedOffsetZone)).toBe(fixedOffsetZone);
 
-  const ianaZone = new IANAZone("Europe/Paris");
+  const ianaZone = IANAZone.create("Europe/Paris");
   expect(Info.normalizeZone(ianaZone)).toBe(ianaZone);
 
   const invalidZone = new InvalidZone("bumblebee");
@@ -91,7 +91,7 @@ test.each<[string | number, Zone]>([
   ["UTC", FixedOffsetZone.utcInstance],
   ["Etc/GMT+5", FixedOffsetZone.instance(-5 * 60)],
   ["Etc/GMT-10", FixedOffsetZone.instance(+10 * 60)],
-  ["Europe/Paris", new IANAZone("Europe/Paris")],
+  ["Europe/Paris", IANAZone.create("Europe/Paris")],
   [0, FixedOffsetZone.utcInstance],
   [3, FixedOffsetZone.instance(3)],
   [-11, FixedOffsetZone.instance(-11)]

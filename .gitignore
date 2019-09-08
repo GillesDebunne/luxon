@@ -1,9 +1,9 @@
-node_modules
-.tern-port
-build
+node_modules/
+build/
+transpiled/
 #*
 .#*
-coverage/
+.tern-port
 .DS_Store
 .external-ecmascript.js
 .idea

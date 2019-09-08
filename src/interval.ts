@@ -33,7 +33,7 @@ interface Config {
  * * **Interrogation** To analyze the Interval, use {@link count}, {@link length}, {@link hasSame}, {@link contains}, {@link isAfter}, or {@link isBefore}.
  * * **Transformation** To create other Intervals out of this one, use {@link set}, {@link splitAt}, {@link splitBy}, {@link divideEqually}, {@link merge}, {@link xor}, {@link union}, {@link intersection}, or {@link difference}.
  * * **Comparison** To compare this Interval to another one, use {@link equals}, {@link overlaps}, {@link abutsStart}, {@link abutsEnd}, {@link engulfs}
- * * **Output*** To convert the Interval into other representations, see {@link toString}, {@link toISO}, {@link toFormat}, and {@link toDuration}.
+ * * **Output** To convert the Interval into other representations, see {@link toString}, {@link toISO}, {@link toFormat}, and {@link toDuration}.
  */
 export default class Interval {
   // Private readonly fields
@@ -44,7 +44,7 @@ export default class Interval {
   /**
    * @private
    */
-  constructor(config: Config) {
+  private constructor(config: Config) {
     validateStartEnd(config.start, config.end);
 
     /**
@@ -242,7 +242,7 @@ export default class Interval {
    * @param {DateTime} values.end - the ending DateTime
    * @return {Interval}
    */
-  set({ start, end }: IntervalObject = {}) {
+  set({ start, end }: IntervalObject) {
     return Interval.fromDateTimes(start || this.s, end || this.e);
   }
 

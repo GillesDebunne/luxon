@@ -37,8 +37,13 @@ export default class Settings {
 
   /**
    * Set the default time zone to create DateTimes in. Does not affect existing instances.
-   * Use the value "system" to reset this value to the system's time zone.
-   * @type {Zone | string | number | undefined}
+   *
+   * Use the value "system" (default) to reset this value to the system's time zone.
+   *
+   * zone can be any IANA zone supported by the host environment, or a fixed-offset name of the form 'UTC+3'.
+   *
+   * You may also supply an instance of a {@link Zone} class, or a number which will be interpreted as a UTC offset in minutes.
+   * @param {Zone | string | number} [zone='system'] - the zone value
    */
   static setDefaultZone(zone?: ZoneLike) {
     // GILLES change API !!!

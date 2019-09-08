@@ -134,7 +134,8 @@ export default class IANAZone extends Zone {
     return null;
   }
 
-  constructor(name: string) {
+  private constructor(name: string) {
+    // GILLES made private, use create instead
     super();
     /** @private **/
     this.zoneName = name;
@@ -158,7 +159,7 @@ export default class IANAZone extends Zone {
   }
 
   /** @override **/
-  offsetName(ts: number, { format, locale }: ZoneOffsetOptions) {
+  offsetName(ts: number, { format, locale }: ZoneOffsetOptions = {}) {
     return parseZoneInfo(ts, format, locale, this.name);
   }
 
@@ -181,8 +182,8 @@ export default class IANAZone extends Zone {
   }
 
   /** @override **/
-  equals(otherZone: Zone) {
-    return otherZone.type === "iana" && otherZone.name === this.name;
+  equals(other: Zone) {
+    return other.type === "iana" && other.name === this.name;
   }
 
   /** @override **/
