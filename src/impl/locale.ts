@@ -414,7 +414,7 @@ export default class Locale {
     }
   }
 
-  clone(alts: LocaleOptions, defaultToEN: boolean = false) {
+  clone(alts: LocaleOptions, defaultToEN = false) {
     // GILLES defaultToEN as a separate parameter
     if (!alts || Object.getOwnPropertyNames(alts).length === 0) {
       return this;

@@ -1,8 +1,7 @@
 /* eslint no-global-assign: "off" */
 import { DateTime, Settings, Duration } from "../src/luxon";
-import { NumberingSystem, CalendarSystem } from "src/types/locale";
-import { ZoneLike } from "src/types/zone";
-import { ConversionAccuracy } from "src/types/common";
+import { NumberingSystem, CalendarSystem } from "../src/types/locale";
+import { ZoneLike } from "../src/types/zone";
 
 const withoutIntl = function(name: string, f: Function) {
   const fullName = `With no Intl support, ${name}`;
@@ -57,8 +56,7 @@ const withoutZones = function(name: string, f: Function) {
       // @ts-ignore
       Intl.DateTimeFormat = (locale, opts = {}) => {
         if (opts.timeZone) {
-          // eslint-disable-next-line no-throw-literal
-          throw `Unsupported time zone specified ${opts.timeZone}`;
+          throw new Error(`Unsupported time zone specified ${opts.timeZone}`);
         }
         return DateTimeFormat(locale, opts);
       };
@@ -151,7 +149,7 @@ const conversionAccuracy = function(duration: Duration) {
     milliseconds: 0
   };
   const isCasual = duration.set(fourWeeks).normalize().months === 1;
-  return (isCasual ? "casual" : "longterm") as ConversionAccuracy;
+  return isCasual ? "casual" : "longterm";
 };
 
 const Helpers = {

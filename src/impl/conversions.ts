@@ -32,7 +32,7 @@ function uncomputeOrdinal(year: number, ordinal: number) {
  * @private
  */
 
-export function gregorianToWeek(gregObj: GregorianDateTime) {
+export function gregorianToWeek(gregObj: GregorianDateTime): WeekDateTime {
   const { year, month, day } = gregObj,
     ordinal = computeOrdinal(year, month, day),
     weekday = dayOfWeek(year, month, day);
@@ -50,7 +50,7 @@ export function gregorianToWeek(gregObj: GregorianDateTime) {
     weekYear = year;
   }
 
-  return Object.assign({ weekYear, weekNumber, weekday }, timeObject(gregObj)) as WeekDateTime;
+  return Object.assign({ weekYear, weekNumber, weekday }, timeObject(gregObj));
 }
 
 export function weekToGregorian(weekData: WeekDateTime) {
@@ -76,11 +76,11 @@ export function weekToGregorian(weekData: WeekDateTime) {
   return Object.assign({ year, month, day }, timeObject(weekData));
 }
 
-export function gregorianToOrdinal(gregData: GregorianDateTime) {
+export function gregorianToOrdinal(gregData: GregorianDateTime): OrdinalDateTime {
   const { year, month, day } = gregData,
     ordinal = computeOrdinal(year, month, day);
 
-  return Object.assign({ year, ordinal }, timeObject(gregData)) as OrdinalDateTime;
+  return Object.assign({ year, ordinal }, timeObject(gregData));
 }
 
 export function ordinalToGregorian(ordinalData: OrdinalDateTime) {

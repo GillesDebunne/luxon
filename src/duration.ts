@@ -1,4 +1,4 @@
-import { isUndefined, isNumber, normalizeObject, hasOwnProperty } from "./impl/util";
+import { isUndefined, isNumber, normalizeObject } from "./impl/util";
 import Locale from "./impl/locale";
 import Formatter from "./impl/formatter";
 import { parseISODuration } from "./impl/regexParser";
@@ -380,8 +380,8 @@ export default class Duration {
    * @example Duration.fromObject({ years: 1, days: 6, seconds: 2 }).toObject() //=> { years: 1, days: 6, seconds: 2 }
    * @return {Object}
    */
-  toObject() {
-    return Object.assign({}, this.values) as DurationObject;
+  toObject(): DurationObject {
+    return Object.assign({}, this.values);
   }
 
   /**
@@ -444,11 +444,11 @@ export default class Duration {
     const dur = friendlyDuration(duration),
       result: NormalizedDurationObject = {};
 
-    for (const k of orderedUnits) {
-      if (hasOwnProperty(dur.values, k) || hasOwnProperty(this.values, k)) {
-        result[k] = dur.get(k) + this.get(k);
+    orderedUnits.forEach(unit => {
+      if (dur.values[unit] !== undefined || this.values[unit] !== undefined) {
+        result[unit] = dur.get(unit) + this.get(unit);
       }
-    }
+    });
 
     return this.clone(result, true);
   }
@@ -720,8 +720,8 @@ export default class Duration {
     return new Duration(conf);
   }
 
-  private conversionAccuracy() {
-    return (this.matrix === accurateMatrix ? "longterm" : "casual") as ConversionAccuracy;
+  private conversionAccuracy(): ConversionAccuracy {
+    return this.matrix === accurateMatrix ? "longterm" : "casual";
   }
 }
 

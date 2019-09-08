@@ -98,7 +98,7 @@ function fixOffset(localTS: number, o: number, tz: Zone): [number, number] {
 }
 
 // convert an epoch timestamp into a calendar object with the given offset
-function tsToObj(ts: number, offset: number) {
+function tsToObj(ts: number, offset: number): GregorianDateTime {
   ts += offset * 60 * 1000;
 
   const d = new Date(ts);
@@ -111,7 +111,7 @@ function tsToObj(ts: number, offset: number) {
     minute: d.getUTCMinutes(),
     second: d.getUTCSeconds(),
     millisecond: d.getUTCMilliseconds()
-  } as GregorianDateTime;
+  };
 }
 
 // convert a calendar object to an epoch timestamp
@@ -278,16 +278,14 @@ function normalizeUnit(unit: string) {
   return normalized;
 }
 
-function lastOpts(argList: IArguments): [DateTimeOptions, Array<number>] {
-  let options: Object = {},
-    args;
+function lastOpts(argList: unknown[]): [DateTimeOptions, number[]] {
   if (argList.length > 0 && typeof argList[argList.length - 1] === "object") {
-    options = argList[argList.length - 1];
-    args = Array.from(argList).slice(0, argList.length - 1);
+    const options = argList[argList.length - 1] as {};
+    const args = Array.from(argList).slice(0, argList.length - 1);
+    return [options, args as number[]];
   } else {
-    args = Array.from(argList);
+    return [{}, Array.from(argList) as number[]];
   }
-  return [options, args];
 }
 
 type DiffRelativeOptions = ToRelativeOptions & {
@@ -409,12 +407,12 @@ export default class DateTime {
    * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @return {DateTime}
    */
-  static local(..._args: number[]): DateTime;
-  static local(..._args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
-  static local(..._args: (number | DateTimeOptions)[]): DateTime | null;
-  static local(..._args: (number | DateTimeOptions)[]) {
-    const [options, args] = lastOpts(arguments),
-      [year, month, day, hour, minute, second, millisecond] = args;
+  static local(...args: number[]): DateTime;
+  static local(...args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
+  static local(...args: (number | DateTimeOptions)[]): DateTime | null;
+  static local(...args: (number | DateTimeOptions)[]) {
+    const [options, values] = lastOpts(args),
+      [year, month, day, hour, minute, second, millisecond] = values;
     return DateTime.quickDT({ year, month, day, hour, minute, second, millisecond }, options);
   }
 
@@ -443,12 +441,12 @@ export default class DateTime {
    * @example DateTime.utc(2017, 3, 12, 5, 45, 10, 765, { locale: "fr")    //~> 2017-03-12T05:45:10.765Z with a French locale
    * @return {DateTime}
    */
-  static utc(..._args: number[]): DateTime;
-  static utc(..._args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
-  static utc(..._args: (number | DateTimeOptions)[]): DateTime | null;
-  static utc(..._args: (number | DateTimeOptions)[]) {
-    const [options, args] = lastOpts(arguments),
-      [year, month, day, hour, minute, second, millisecond] = args;
+  static utc(...args: number[]): DateTime;
+  static utc(...args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
+  static utc(...args: (number | DateTimeOptions)[]): DateTime | null;
+  static utc(...args: (number | DateTimeOptions)[]) {
+    const [options, values] = lastOpts(args),
+      [year, month, day, hour, minute, second, millisecond] = values;
 
     options.zone = FixedOffsetZone.utcInstance;
     return DateTime.quickDT({ year, month, day, hour, minute, second, millisecond }, options);
@@ -646,8 +644,8 @@ export default class DateTime {
     const gregorian = useWeekData
         ? weekToGregorian(normalized as WeekDateTime)
         : containsOrdinal
-          ? ordinalToGregorian(normalized as OrdinalDateTime)
-          : (normalized as GregorianDateTime),
+        ? ordinalToGregorian(normalized as OrdinalDateTime)
+        : (normalized as GregorianDateTime),
       [tsFinal] = objToTS(gregorian, offsetProvis, zoneToUse), // GILLES offset ignored
       inst = new DateTime({
         ts: tsFinal,
@@ -1155,7 +1153,7 @@ export default class DateTime {
    * @param {Object} [options={}] - options to pass to `setZone()`
    * @return {DateTime}
    */
-  toUTC(offset: number = 0, options: ZoneOptions = {}) {
+  toUTC(offset = 0, options: ZoneOptions = {}) {
     return this.setZone(FixedOffsetZone.instance(offset), options);
   }
 
@@ -1981,9 +1979,9 @@ export default class DateTime {
     return Formats.DATETIME_HUGE_WITH_SECONDS;
   }
 
-  //*******************************//
+  //* *************************** *//
   // Static private helper methods //
-  //*******************************//
+  //* *************************** *//
   // we cache week data on the DT object and this intermediates the cache
   private possiblyCachedWeekData() {
     if (this.weekData === undefined) {

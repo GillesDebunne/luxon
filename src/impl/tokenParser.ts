@@ -1,4 +1,4 @@
-import { parseMillis, isUndefined, untruncateYear, signedOffset, hasOwnProperty } from "./util";
+import { parseMillis, isUndefined, untruncateYear, signedOffset } from "./util";
 import Formatter, { FormatToken } from "./formatter";
 import FixedOffsetZone from "../zones/fixedOffsetZone";
 import IANAZone from "../zones/IANAZone";
@@ -206,21 +206,18 @@ function match(
   regex: RegExp,
   handlers: UnitParser[]
 ): [RegExpMatchArray | null, Record<string, number | string>] {
-  const matches = input.match(regex);
+  const matches = regex.exec(input);
   const all: Record<string, number | string> = {};
 
-  if (matches) {
+  if (matches !== null) {
     let matchIndex = 1;
-    for (const i in handlers) {
-      if (hasOwnProperty(handlers, i)) {
-        const h = handlers[i],
-          groups = h.groups ? h.groups + 1 : 1;
-        if (!h.literal) {
-          all[h.token.val[0]] = h.deser(matches.slice(matchIndex, matchIndex + groups));
-        }
-        matchIndex += groups;
+    handlers.forEach(h => {
+      const groups = h.groups ? h.groups + 1 : 1;
+      if (!h.literal) {
+        all[h.token.val[0]] = h.deser(matches.slice(matchIndex, matchIndex + groups));
       }
-    }
+      matchIndex += groups;
+    });
   }
 
   return [matches, all];

@@ -1,6 +1,6 @@
 import { Duration } from "../../src/luxon";
-import { DurationUnit } from "src/types/duration";
-import { ConversionAccuracy } from "src/types/common";
+import { DurationUnit } from "../../src/types/duration";
+import { ConversionAccuracy } from "../../src/types/common";
 
 const convert = (amt: number, from: DurationUnit, to: DurationUnit, accuracy: ConversionAccuracy) =>
   Duration.fromObject({ [from]: amt }, { conversionAccuracy: accuracy }).as(to);

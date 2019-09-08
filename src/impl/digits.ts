@@ -50,7 +50,7 @@ const numberingSystemsUTF16: { [key in NumberingSystem]: [number, number] } = {
   hanidec: [-1, -1] // see special case for hanidec characters below
 };
 
-// eslint-disable-next-line
+// eslint-disable-next-line no-useless-escape
 const hanidecChars = numberingSystems.hanidec.replace(/[\[|\]]/g, "").split("");
 
 export function parseDigits(str: string) {

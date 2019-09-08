@@ -62,6 +62,7 @@ export default function(
   units: DurationUnit[],
   options: DurationOptions
 ) {
+  // eslint-disable-next-line prefer-const
   let [cursor, results, highWater, lowestOrder] = highOrderDiffs(earlier, later, units);
 
   const remainingMillis = later.valueOf() - cursor.valueOf();

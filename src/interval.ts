@@ -355,7 +355,7 @@ export default class Interval {
    * Specifically, the resulting Interval has the maximum start time and the minimum end time of the two Intervals.
    * Returns null if the intersection is empty, i.e., the intervals don't intersect.
    * @param {Interval} other
-   * @return {Interval}
+   * @return {Interval|null}
    */
   intersection(other: Interval) {
     const s = this.s > other.s ? this.s : other.s,
@@ -449,7 +449,7 @@ export default class Interval {
   difference(...intervals: Interval[]) {
     return Interval.xor([this as Interval].concat(intervals))
       .map(i => this.intersection(i))
-      .filter(i => i && !i.isEmpty());
+      .filter(i => i !== null && !i.isEmpty()) as Interval[];
   }
 
   /**

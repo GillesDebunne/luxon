@@ -115,13 +115,12 @@ test("DateTime.local accepts an options hash in any position", () => {
     DateTime.local(2017, 6, 12, 5, 25, 16, 255, options)
   ];
 
-  for (const i in args) {
-    const dt = args[i];
+  args.forEach(dt => {
     expect(dt.zoneName).toBe("Europe/Paris");
     expect(dt.numberingSystem).toBe("beng");
     expect(dt.outputCalendar).toBe("islamic");
     expect(dt.locale).toBe("fr");
-  }
+  });
 });
 
 const badInputs = [
@@ -276,13 +275,12 @@ test("DateTime.utc accepts an options hash in any position", () => {
     DateTime.utc(2017, 6, 12, 5, 25, 16, 255, options)
   ];
 
-  for (const i in args) {
-    const dt = args[i];
+  args.forEach(dt => {
     expect(dt.zoneName).toBe("UTC");
     expect(dt.numberingSystem).toBe("beng");
     expect(dt.outputCalendar).toBe("islamic");
     expect(dt.locale).toBe("fr");
-  }
+  });
 });
 
 //------

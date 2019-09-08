@@ -5,7 +5,7 @@ import DateTime from "../datetime";
 import { ToRelativeNumeric, ToRelativeUnit, DateTimeFormatOptions } from "../types/datetime";
 import Duration from "../duration";
 
-function stringify(obj: Object) {
+function stringify(obj: Record<string, unknown>) {
   return JSON.stringify(obj, Object.keys(obj).sort());
 }
 

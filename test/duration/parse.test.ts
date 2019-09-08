@@ -1,6 +1,6 @@
 import { Duration } from "../../src/luxon";
 // import { UnparsableStringError } from "../../src/errors";
-import { DurationObject } from "src/types/duration";
+import { DurationObject } from "../../src/types/duration";
 
 //------
 // #fromISO()

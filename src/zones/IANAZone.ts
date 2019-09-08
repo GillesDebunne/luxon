@@ -101,7 +101,7 @@ export default class IANAZone extends Zone {
    * @return {boolean}
    */
   static isValidSpecifier(s: string) {
-    return !!(s && s.match(matchingRegex));
+    return !!(s && matchingRegex.exec(s) !== null);
   }
 
   /**
@@ -125,8 +125,9 @@ export default class IANAZone extends Zone {
   /** @ignore */
   static parseGMTOffset(specifier: string) {
     if (specifier) {
-      const match = specifier.match(/^Etc\/GMT([+-]\d{1,2})$/i);
-      if (match) {
+      const regexp = /^Etc\/GMT([+-]\d{1,2})$/i;
+      const match = regexp.exec(specifier);
+      if (match !== null) {
         return -60 * parseInt(match[1]);
       }
     }

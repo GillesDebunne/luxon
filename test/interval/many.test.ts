@@ -126,14 +126,11 @@ test("Interval.merge returns empty for an empty input", () => {
 // .xor()
 //-------
 function xor(items: Interval[], expected: Interval[]) {
-  const r = Interval.xor(items);
-  expect(r.length).toBe(expected.length);
-  for (const i in expected) {
-    if (Object.prototype.hasOwnProperty.call(expected, i)) {
-      expect(r[i] && r[i].equals(expected[i])).toBeTruthy();
-    }
-  }
-  return r;
+  const result = Interval.xor(items);
+  expect(result.length).toBe(expected.length);
+  let index = 0;
+  result.forEach(i => expect(i.equals(expected[index++])).toBeTruthy());
+  return result;
 }
 
 test("Interval.xor returns non-overlapping intervals as-is", () => {
@@ -182,15 +179,11 @@ test("Interval.xor handles funny adjacency cases", () => {
 // #difference()
 //-------
 function diff(interval: Interval, items: Interval[], expected: Interval[]) {
-  const r = interval.difference(...items);
-  expect(r.length).toBe(expected.length);
-  for (const i in expected) {
-    if (Object.prototype.hasOwnProperty.call(expected, i)) {
-      const diff = r[i];
-      expect(diff !== null && diff.equals(expected[i])).toBeTruthy();
-    }
-  }
-  return r;
+  const result = interval.difference(...items);
+  expect(result.length).toBe(expected.length);
+  let index = 0;
+  result.forEach(diff => expect(diff.equals(expected[index++])).toBeTruthy());
+  return result;
 }
 
 test("Interval#difference returns self for non-overlapping intervals", () => {

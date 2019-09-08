@@ -10,10 +10,8 @@
     "noImplicitReturns": true,
     "removeComments": true,
     "strict": true,
-    "baseUrl": "./",
     "types": ["jest"],
     "noEmit": true,
     "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*", "test/**/*"]
+  }
 }

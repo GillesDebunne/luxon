@@ -77,14 +77,10 @@ export function bestBy<T, U>(arr: T[], by: (_: T) => U, compare: (_: U, __: U) =
 }
 
 export function pick<T, K extends keyof T>(obj: T, keys: K[]) {
-  return keys.reduce<any>((a, k) => {
+  return keys.reduce<Partial<Pick<T, K>>>((a, k) => {
     a[k] = obj[k];
     return a;
   }, {}) as Pick<T, K>;
-}
-
-export function hasOwnProperty(obj: Object, prop: string | symbol) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
 // NUMBERS AND STRINGS
@@ -149,7 +145,7 @@ export function daysInMonth(year: number, month: number) {
 
 // convert a calendar object to a local timestamp (epoch, but with the offset baked in)
 export function objToLocalTS(obj: GregorianDateTime) {
-  let ts = Date.UTC(
+  const ts = Date.UTC(
     obj.year,
     obj.month - 1,
     obj.day,
@@ -239,16 +235,15 @@ function asNumber(value: unknown) {
   return numericValue;
 }
 
-export function normalizeObject<T extends string>(obj: any, normalizer: (key: string) => T) {
-  const normalized: Partial<Record<T, number>> = {};
-  for (const u in obj) {
-    if (hasOwnProperty(obj, u)) {
-      const value = obj[u];
-      if (value === undefined || value === null) continue;
-      normalized[normalizer(u)] = asNumber(value);
-    }
-  }
-  return normalized;
+export function normalizeObject<T extends string>(
+  obj: Record<string, any>,
+  normalizer: (key: string) => T
+) {
+  return Object.keys(obj).reduce<Partial<Record<T, number>>>((normalized, key) => {
+    const value = obj[key];
+    if (value !== undefined && value !== null) normalized[normalizer(key)] = asNumber(value);
+    return normalized;
+  }, {});
 }
 
 export function formatOffset(offset: number, format: ZoneOffsetFormat) {
@@ -269,8 +264,8 @@ export function formatOffset(offset: number, format: ZoneOffsetFormat) {
   }
 }
 
-export function timeObject(obj: TimeObject) {
-  return pick(obj, ["hour", "minute", "second", "millisecond"]) as TimeObject;
+export function timeObject(obj: TimeObject): TimeObject {
+  return pick(obj, ["hour", "minute", "second", "millisecond"]);
 }
 
 export const ianaRegex = /[A-Za-z_+-]{1,256}(:?\/[A-Za-z_+-]{1,256}(\/[A-Za-z_+-]{1,256})?)?/;

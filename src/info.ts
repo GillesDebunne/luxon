@@ -6,7 +6,7 @@ import { normalizeZone } from "./impl/zoneUtil";
 
 import { hasFormatToParts, hasIntl, hasRelative } from "./impl/util";
 import { StringUnitLength, UnitLength } from "./types/common";
-import { InfoOptions, Features, InfoCalendarOptions, InfoUnitOptions } from "./types/info";
+import { InfoOptions, InfoCalendarOptions, InfoUnitOptions, Features } from "./types/info";
 import { ZoneLike } from "./types/zone";
 
 /**
@@ -178,7 +178,7 @@ export default class Info {
    * @example Info.features() //=> { intl: true, intlTokens: false, zones: true, relative: false }
    * @return {Object}
    */
-  static features() {
+  static features(): Features {
     let intl = false,
       intlTokens = false,
       zones = false,
@@ -198,6 +198,6 @@ export default class Info {
       }
     }
 
-    return { intl, intlTokens, zones, relative } as Features;
+    return { intl, intlTokens, zones, relative };
   }
 }
