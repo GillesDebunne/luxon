@@ -5,7 +5,7 @@ import { ZoneOffsetFormat, ZoneOffsetOptions } from "../types/zone";
 let singleton: SystemZone | null = null;
 
 /**
- * Represents the local zone for this Javascript environment.
+ * Represents the system's local zone for this Javascript environment.
  * @implements {Zone}
  */
 export default class SystemZone extends Zone {

@@ -263,6 +263,9 @@ export default class Duration {
     });
   }
 
+  static fromISO(text: string): Duration;
+  static fromISO(text: string, options: DurationFromISOOptions & ThrowOnInvalid): Duration;
+  static fromISO(text: string, options: DurationFromISOOptions): Duration | null;
   /**
    * Create a Duration from an ISO 8601 duration string.
    * @param {string} text - text to parse
@@ -277,9 +280,6 @@ export default class Duration {
    * @example Duration.fromISO('P5Y3M').toObject() //=> { years: 5, months: 3 }
    * @return {Duration}
    */
-  static fromISO(text: string): Duration;
-  static fromISO(text: string, options: DurationFromISOOptions & ThrowOnInvalid): Duration;
-  static fromISO(text: string, options: DurationFromISOOptions): Duration | null;
   static fromISO(text: string, options: DurationFromISOOptions = {}) {
     const parsed = parseISODuration(text);
     if (parsed) {
@@ -709,6 +709,9 @@ export default class Duration {
     return true;
   }
 
+  /**
+   * @private
+   */
   // clone really means "create another instance just like this one, but with these changes"
   private clone(values: NormalizedDurationObject, clear: boolean) {
     // deep merge for vals
@@ -720,6 +723,9 @@ export default class Duration {
     return new Duration(conf);
   }
 
+  /**
+   * @private
+   */
   private conversionAccuracy(): ConversionAccuracy {
     return this.matrix === accurateMatrix ? "longterm" : "casual";
   }

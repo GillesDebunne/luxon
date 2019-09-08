@@ -1,6 +1,11 @@
 import { ZoneIsAbstractError } from "./errors";
 import { ZoneOffsetOptions, ZoneOffsetFormat } from "./types/zone";
 
+// Prefixing the parameter names with a _ confuses ESDoc
+function silenceUnusedWarning(...args: unknown[]) {
+  if (args) null;
+}
+
 /**
  * @interface
  * An abstract Zone class
@@ -42,7 +47,8 @@ export default abstract class Zone {
    * @param {string} options.locale - What locale to return the offset name in.
    * @return {string | null}
    */
-  offsetName(_ts: number, _options: ZoneOffsetOptions): string | null {
+  offsetName(ts: number, options: ZoneOffsetOptions): string | null {
+    silenceUnusedWarning(ts, options);
     throw new ZoneIsAbstractError();
   }
 
@@ -54,7 +60,8 @@ export default abstract class Zone {
    *                          Accepts 'narrow', 'short', or 'techie'. Returning '+6', '+06:00', or '+0600' respectively
    * @return {string}
    */
-  formatOffset(_ts: number, _format: ZoneOffsetFormat): string {
+  formatOffset(ts: number, format: ZoneOffsetFormat): string {
+    silenceUnusedWarning(ts, format);
     throw new ZoneIsAbstractError();
   }
 
@@ -64,7 +71,8 @@ export default abstract class Zone {
    * @param {number} ts - Epoch milliseconds for which to compute the offset
    * @return {number}
    */
-  offset(_ts: number): number {
+  offset(ts: number): number {
+    silenceUnusedWarning(ts);
     throw new ZoneIsAbstractError();
   }
 
@@ -74,7 +82,8 @@ export default abstract class Zone {
    * @param {Zone} otherZone - the zone to compare
    * @return {boolean}
    */
-  equals(_otherZone: Zone): boolean {
+  equals(otherZone: Zone): boolean {
+    silenceUnusedWarning(otherZone);
     throw new ZoneIsAbstractError();
   }
 

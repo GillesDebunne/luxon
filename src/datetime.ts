@@ -356,7 +356,14 @@ export default class DateTime {
 
     const unchanged = config.old && config.old.ts === this.ts && config.old.zone.equals(zone);
 
+    /**
+     * @access private
+     */
+
     this.c = config.old && unchanged ? config.old.c : tsToObj(this.ts, zone.offset(this.ts));
+    /**
+     * @access private
+     */
     this.o = config.old && unchanged ? config.old.o : zone.offset(this.ts);
 
     /**
@@ -379,16 +386,24 @@ export default class DateTime {
 
   // CONSTRUCT
 
+  static local(...args: number[]): DateTime;
+  static local(...args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
+  static local(...args: (number | DateTimeOptions)[]): DateTime | null;
   /**
    * Create a local DateTime
-   * @param {number} year - The calendar year. If omitted (as in, call `local()` with no arguments), the current time will be used
+   * @param {number} [year] - The calendar year. If omitted (as in, call `local()` with no arguments), the current time will be used
    * @param {number} [month=1] - The month, 1-indexed
    * @param {number} [day=1] - The day of the month
    * @param {number} [hour=0] - The hour of the day, in 24-hour time
    * @param {number} [minute=0] - The minute of the hour, i.e. a number between 0 and 59
    * @param {number} [second=0] - The second of the minute, i.e. a number between 0 and 59
    * @param {number} [millisecond=0] - The millisecond of the second, i.e. a number between 0 and 999
-   * @param {object} [options] - Options for creation
+   * @param {Object} [options] - Options for creation
+   * @param {string|Zone} [options.zone='local'] - the zone to place the DateTime into
+   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.local()                                  //~> now
    * @example DateTime.local({ zone: "America/New_York" })      //~> now, in US east coast time
    * @example DateTime.local(2017)                              //~> 2017-01-01T00:00:00
@@ -399,26 +414,20 @@ export default class DateTime {
    * @example DateTime.local(2017, 3, 12, 5, 45)                //~> 2017-03-12T05:45:00
    * @example DateTime.local(2017, 3, 12, 5, 45, 10)            //~> 2017-03-12T05:45:10
    * @example DateTime.local(2017, 3, 12, 5, 45, 10, 765)       //~> 2017-03-12T05:45:10.765
-   * @param {Object} options - configuration options for the DateTime
-   * @param {string|Zone} [options.zone='local'] - the zone to place the DateTime into
-   * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
-   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @return {DateTime}
    */
-  static local(...args: number[]): DateTime;
-  static local(...args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
-  static local(...args: (number | DateTimeOptions)[]): DateTime | null;
   static local(...args: (number | DateTimeOptions)[]) {
     const [options, values] = lastOpts(args),
       [year, month, day, hour, minute, second, millisecond] = values;
     return DateTime.quickDT({ year, month, day, hour, minute, second, millisecond }, options);
   }
 
+  static utc(...args: number[]): DateTime;
+  static utc(...args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
+  static utc(...args: (number | DateTimeOptions)[]): DateTime | null;
   /**
    * Create a DateTime in UTC
-   * @param {number} year - The calendar year. If omitted (as in, call `utc()` with no arguments), the current time will be used
+   * @param {number} [year] - The calendar year. If omitted (as in, call `utc()` with no arguments), the current time will be used
    * @param {number} [month=1] - The month, 1-indexed
    * @param {number} [day=1] - The day of the month
    * @param {number} [hour=0] - The hour of the day, in 24-hour time
@@ -427,8 +436,8 @@ export default class DateTime {
    * @param {number} [millisecond=0] - The millisecond of the second, i.e. a number between 0 and 999
    * @param {Object} options - configuration options for the DateTime
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.utc()                                               //~> now
    * @example DateTime.utc(2017)                                           //~> 2017-01-01T00:00:00Z
@@ -441,9 +450,6 @@ export default class DateTime {
    * @example DateTime.utc(2017, 3, 12, 5, 45, 10, 765, { locale: "fr")    //~> 2017-03-12T05:45:10.765Z with a French locale
    * @return {DateTime}
    */
-  static utc(...args: number[]): DateTime;
-  static utc(...args: (number | (DateTimeOptions & ThrowOnInvalid))[]): DateTime;
-  static utc(...args: (number | DateTimeOptions)[]): DateTime | null;
   static utc(...args: (number | DateTimeOptions)[]) {
     const [options, values] = lastOpts(args),
       [year, month, day, hour, minute, second, millisecond] = values;
@@ -452,20 +458,20 @@ export default class DateTime {
     return DateTime.quickDT({ year, month, day, hour, minute, second, millisecond }, options);
   }
 
+  static fromJSDate(date: Date): DateTime;
+  static fromJSDate(date: Date, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromJSDate(date: Date, options: DateTimeOptions): DateTime | null;
   /**
    * Create a DateTime from a Javascript Date object. Uses the default zone.
    * @param {Date} date - a Javascript Date object
    * @param {Object} options - configuration options for the DateTime
    * @param {string|Zone} [options.zone='default'] - the zone to place the DateTime into
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @return {DateTime}
    */
-  static fromJSDate(date: Date): DateTime;
-  static fromJSDate(date: Date, options: DateTimeOptions & ThrowOnInvalid): DateTime;
-  static fromJSDate(date: Date, options: DateTimeOptions): DateTime | null;
   static fromJSDate(date: Date, options: DateTimeOptions = {}) {
     if (!isDate(date) || Number.isNaN(date.valueOf())) {
       if (options.nullOnInvalid) return null;
@@ -479,20 +485,20 @@ export default class DateTime {
     });
   }
 
+  static fromMillis(milliseconds: number): DateTime;
+  static fromMillis(milliseconds: number, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromMillis(milliseconds: number, options: DateTimeOptions): DateTime | null;
   /**
    * Create a DateTime from a number of milliseconds since the epoch (i.e. since 1 January 1970 00:00:00 UTC). Uses the default zone.
    * @param {number} milliseconds - a number of milliseconds since 1970 UTC
    * @param {Object} options - configuration options for the DateTime
    * @param {string|Zone} [options.zone='default'] - the zone to place the DateTime into
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @return {DateTime}
    */
-  static fromMillis(milliseconds: number): DateTime;
-  static fromMillis(milliseconds: number, options: DateTimeOptions & ThrowOnInvalid): DateTime;
-  static fromMillis(milliseconds: number, options: DateTimeOptions): DateTime | null;
   static fromMillis(milliseconds: number, options: DateTimeOptions = {}) {
     if (!isNumber(milliseconds)) {
       if (options.nullOnInvalid) return null;
@@ -511,20 +517,20 @@ export default class DateTime {
     });
   }
 
+  static fromSeconds(seconds: number): DateTime;
+  static fromSeconds(seconds: number, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromSeconds(seconds: number, options: DateTimeOptions): DateTime | null;
   /**
    * Create a DateTime from a number of seconds since the epoch (i.e. since 1 January 1970 00:00:00 UTC). Uses the default zone.
    * @param {number} seconds - a number of seconds since 1970 UTC
    * @param {Object} options - configuration options for the DateTime
    * @param {string|Zone} [options.zone='default'] - the zone to place the DateTime into
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @return {DateTime}
    */
-  static fromSeconds(seconds: number): DateTime;
-  static fromSeconds(seconds: number, options: DateTimeOptions & ThrowOnInvalid): DateTime;
-  static fromSeconds(seconds: number, options: DateTimeOptions): DateTime | null;
   static fromSeconds(seconds: number, options: DateTimeOptions = {}) {
     if (!isNumber(seconds)) {
       if (options.nullOnInvalid) return null;
@@ -538,6 +544,9 @@ export default class DateTime {
     });
   }
 
+  static fromObject(object: GenericDateTime): DateTime;
+  static fromObject(object: GenericDateTime, options: DateTimeOptions & ThrowOnInvalid): DateTime;
+  static fromObject(object: GenericDateTime, options: DateTimeOptions): DateTime | null;
   /**
    * Create a DateTime from a Javascript object with keys like 'year' and 'hour' with reasonable defaults.
    * @param {Object} object - the object to create the DateTime from
@@ -555,8 +564,8 @@ export default class DateTime {
    * @param {Object} options - configuration options for the DateTime
    * @param {string|Zone} [options.zone='default'] - the zone to place the DateTime into
    * @param {string} [options.locale] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {bool} [options.nullOnInvalid=false] - return null on invalid values instead of throwing an error
    * @example DateTime.fromObject({ year: 1982, month: 5, day: 25}).toISODate() //=> '1982-05-25'
    * @example DateTime.fromObject({ year: 1982 }).toISODate() //=> '1982-01-01'
@@ -567,9 +576,6 @@ export default class DateTime {
    * @example DateTime.fromObject({ weekYear: 2016, weekNumber: 2, weekday: 3 }).toISODate() //=> '2016-01-13'
    * @return {DateTime}
    */
-  static fromObject(object: GenericDateTime): DateTime;
-  static fromObject(object: GenericDateTime, options: DateTimeOptions & ThrowOnInvalid): DateTime;
-  static fromObject(object: GenericDateTime, options: DateTimeOptions): DateTime | null;
   static fromObject(object: GenericDateTime, options: DateTimeOptions = {}) {
     const zoneToUse = normalizeZone(options.zone, Settings.defaultZone);
     if (!zoneToUse.isValid) {
@@ -662,6 +668,9 @@ export default class DateTime {
     return inst;
   }
 
+  static fromISO(text: string): DateTime;
+  static fromISO(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromISO(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   /**
    * Create a DateTime from an ISO 8601 string
    * @param {string} text - the ISO string
@@ -669,8 +678,8 @@ export default class DateTime {
    * @param {string|Zone} [options.zone='default'] - use this zone if no offset is specified in the input string itself. Will also convert the time to this zone
    * @param {boolean} [options.setZone=false] - override the zone with a fixed-offset zone specified in the string itself, if it specifies one
    * @param {string} [options.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {bool} [options.nullOnInvalid=false] - return null on invalid strings instead of throwing an error
    * @example DateTime.fromISO('2016-05-25T09:08:34.123')
    * @example DateTime.fromISO('2016-05-25T09:08:34.123+06:00')
@@ -679,14 +688,14 @@ export default class DateTime {
    * @example DateTime.fromISO('2016-W05-4')
    * @return {DateTime}
    */
-  static fromISO(text: string): DateTime;
-  static fromISO(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
-  static fromISO(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   static fromISO(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseISODate(text);
     return parseDataToDateTime(vals, parsedZone, options, "ISO 8601", text);
   }
 
+  static fromRFC2822(text: string): DateTime;
+  static fromRFC2822(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromRFC2822(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   /**
    * Create a DateTime from an RFC 2822 string
    * @param {string} text - the RFC 2822 string
@@ -694,22 +703,22 @@ export default class DateTime {
    * @param {string|Zone} [options.zone='default'] - convert the time to this zone. Since the offset is always specified in the string itself, this has no effect on the interpretation of string, merely the zone the resulting DateTime is expressed in.
    * @param {boolean} [options.setZone=false] - override the zone with a fixed-offset zone specified in the string itself, if it specifies one
    * @param {string} [options.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.fromRFC2822('25 Nov 2016 13:23:12 GMT')
    * @example DateTime.fromRFC2822('Fri, 25 Nov 2016 13:23:12 +0600')
    * @example DateTime.fromRFC2822('25 Nov 2016 13:23 Z')
    * @return {DateTime}
    */
-  static fromRFC2822(text: string): DateTime;
-  static fromRFC2822(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
-  static fromRFC2822(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   static fromRFC2822(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseRFC2822Date(text);
     return parseDataToDateTime(vals, parsedZone, options, "RFC 2822", text);
   }
 
+  static fromHTTP(text: string): DateTime;
+  static fromHTTP(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromHTTP(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   /**
    * Create a DateTime from an HTTP header date
    * @see https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3.1
@@ -718,37 +727,19 @@ export default class DateTime {
    * @param {string|Zone} [options.zone='default'] - convert the time to this zone. Since HTTP dates are always in UTC, this has no effect on the interpretation of string, merely the zone the resulting DateTime is expressed in.
    * @param {boolean} [options.setZone=false] - override the zone with the fixed-offset zone specified in the string. For HTTP dates, this is always UTC, so this option is equivalent to setting the `zone` option to 'utc', but this option is included for consistency with similar methods.
    * @param {string} [options.locale='system's locale'] - a locale to set on the resulting DateTime instance
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to set on the resulting DateTime instance
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to set on the resulting DateTime instance
    * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.fromHTTP('Sun, 06 Nov 1994 08:49:37 GMT')
    * @example DateTime.fromHTTP('Sunday, 06-Nov-94 08:49:37 GMT')
    * @example DateTime.fromHTTP('Sun Nov  6 08:49:37 1994')
    * @return {DateTime}
    */
-  static fromHTTP(text: string): DateTime;
-  static fromHTTP(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
-  static fromHTTP(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   static fromHTTP(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseHTTPDate(text);
     return parseDataToDateTime(vals, parsedZone, options, "HTTP", text);
   }
 
-  /**
-   * Create a DateTime from an input string and format string.
-   * Defaults to en-US if no locale has been specified, regardless of the system's locale.
-   * @see https://moment.github.io/luxon/docs/manual/parsing.html#table-of-tokens
-   * @param {string} text - the string to parse
-   * @param {string} format - the format the string is expected to be in (see the link below for the formats)
-   * @param {Object} options - options to affect the creation
-   * @param {string|Zone} [options.zone='default'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
-   * @param {boolean} [options.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
-   * @param {string} [options.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
-   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
-   * @return {DateTime}
-   */
   static fromFormat(text: string, format: string): DateTime;
   static fromFormat(
     text: string,
@@ -760,6 +751,21 @@ export default class DateTime {
     format: string,
     options: DateTimeWithZoneOptions
   ): DateTime | null;
+  /**
+   * Create a DateTime from an input string and format string.
+   * Defaults to en-US if no locale has been specified, regardless of the system's locale.
+   * @see https://moment.github.io/luxon/docs/manual/parsing.html#table-of-tokens
+   * @param {string} text - the string to parse
+   * @param {string} format - the format the string is expected to be in (see the link below for the formats)
+   * @param {Object} options - options to affect the creation
+   * @param {string|Zone} [options.zone='default'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
+   * @param {boolean} [options.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
+   * @param {string} [options.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
+   * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
+   * @return {DateTime}
+   */
   static fromFormat(text: string, format: string, options: DateTimeWithZoneOptions = {}) {
     if (isUndefined(text) || isUndefined(format)) {
       if (options.nullOnInvalid) return null;
@@ -790,6 +796,9 @@ export default class DateTime {
     }
   }
 
+  static fromSQL(text: string): DateTime;
+  static fromSQL(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
+  static fromSQL(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   /**
    * Create a DateTime from a SQL date, time, or datetime
    * Defaults to en-US if no locale has been specified, regardless of the system's locale
@@ -798,8 +807,8 @@ export default class DateTime {
    * @param {string|Zone} [options.zone='default'] - use this zone if no offset is specified in the input string itself. Will also convert the DateTime to this zone
    * @param {boolean} [options.setZone=false] - override the zone with a zone specified in the string itself, if it specifies one
    * @param {string} [options.locale='en-US'] - a locale string to use when parsing. Will also set the DateTime to this locale
-   * @param {string} options.outputCalendar - the output calendar to set on the resulting DateTime instance
-   * @param {string} options.numberingSystem - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
+   * @param {string} [options.outputCalendar] - the output calendar to set on the resulting DateTime instance
+   * @param {string} [options.numberingSystem] - the numbering system to use when parsing. Will also set the resulting DateTime to this numbering system
    * @param {string} [options.nullOnInvalid=false] - whether to return `null` on failed parsing instead of throwing
    * @example DateTime.fromSQL('2017-05-15')
    * @example DateTime.fromSQL('2017-05-15 09:12:34')
@@ -811,9 +820,6 @@ export default class DateTime {
    * @example DateTime.fromSQL('09:12:34.342')
    * @return {DateTime}
    */
-  static fromSQL(text: string): DateTime;
-  static fromSQL(text: string, options: DateTimeWithZoneOptions & ThrowOnInvalid): DateTime;
-  static fromSQL(text: string, options: DateTimeWithZoneOptions): DateTime | null;
   static fromSQL(text: string, options: DateTimeWithZoneOptions = {}) {
     const [vals, parsedZone] = parseSQL(text);
     return parseDataToDateTime(vals, parsedZone, options, "SQL", text);
@@ -1712,7 +1718,7 @@ export default class DateTime {
    * @param {boolean} [options.round=true] - whether to round the numbers in the output.
    * @param {boolean} [options.padding=0] - padding in milliseconds. This allows you to round up the result if it fits inside the threshold. Don't use in combination with {round: false} because the decimal output will include the padding.
    * @param {string} options.locale - override the locale of this DateTime
-   * @param {string} options.numberingSystem - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
+   * @param {string} [options.numberingSystem] - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
    * @example DateTime.local().plus({ days: 1 }).toRelative() //=> "in 1 day"
    * @example DateTime.local().setLocale("es").toRelative({ days: 1 }) //=> "dentro de 1 día"
    * @example DateTime.local().plus({ days: 1 }).toRelative({ locale: "fr" }) //=> "dans 23 heures"
@@ -1741,7 +1747,7 @@ export default class DateTime {
    * @param {DateTime} [options.base=DateTime.local()] - the DateTime to use as the basis to which this time is compared. Defaults to now.
    * @param {string} options.locale - override the locale of this DateTime
    * @param {string} options.unit - use a specific unit; if omitted, the method will pick the unit. Use one of "years", "quarters", "months", "weeks", or "days"
-   * @param {string} options.numberingSystem - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
+   * @param {string} [options.numberingSystem] - override the numberingSystem of this DateTime. The Intl system may choose not to honor this
    * @example DateTime.local().plus({ days: 1 }).toRelativeCalendar() //=> "tomorrow"
    * @example DateTime.local().setLocale("es").plus({ days: 1 }).toRelative() //=> ""mañana"
    * @example DateTime.local().plus({ days: 1 }).toRelativeCalendar({ locale: "fr" }) //=> "demain"
@@ -1759,13 +1765,13 @@ export default class DateTime {
     );
   }
 
+  static min(): undefined;
+  static min(...dateTimes: DateTime[]): DateTime;
   /**
    * Return the min of several date times
    * @param {...DateTime} dateTimes - the DateTimes from which to choose the minimum
    * @return {DateTime} the min DateTime, or undefined if called with no arguments
    */
-  static min(): undefined;
-  static min(...dateTimes: DateTime[]): DateTime;
   static min(...dateTimes: DateTime[]) {
     if (!dateTimes.every(DateTime.isDateTime)) {
       throw new InvalidArgumentError("min requires all arguments be DateTimes");
@@ -1774,13 +1780,13 @@ export default class DateTime {
     return bestBy(dateTimes, i => i.valueOf(), Math.min);
   }
 
+  static max(): undefined;
+  static max(...dateTimes: DateTime[]): DateTime;
   /**
    * Return the max of several date times
    * @param {...DateTime} dateTimes - the DateTimes from which to choose the maximum
    * @return {DateTime} the max DateTime, or undefined if called with no arguments
    */
-  static max(): undefined;
-  static max(...dateTimes: DateTime[]): DateTime;
   static max(...dateTimes: DateTime[]) {
     if (!dateTimes.every(DateTime.isDateTime)) {
       throw new InvalidArgumentError("max requires all arguments be DateTimes");
@@ -1979,6 +1985,9 @@ export default class DateTime {
     return Formats.DATETIME_HUGE_WITH_SECONDS;
   }
 
+  /**
+   * @private
+   */
   //* *************************** *//
   // Static private helper methods //
   //* *************************** *//
@@ -1990,6 +1999,9 @@ export default class DateTime {
     return this.weekData;
   }
 
+  /**
+   * @private
+   */
   // clone really means, "make a new object with these modifications". all "setters" really use this
   // to create a new object while only changing some of the properties
   private clone(alts: { ts?: number; zone?: Zone; loc?: Locale; o?: number }) {
@@ -2003,6 +2015,9 @@ export default class DateTime {
     return new DateTime(Object.assign({}, current, alts, { old: current }));
   }
 
+  /**
+   * @private
+   */
   // this is a dumbed down version of fromObject() that runs about 60% faster
   // but doesn't do any validation, makes a bunch of assumptions about what units
   // are present, and so on.
@@ -2036,6 +2051,9 @@ export default class DateTime {
     return new DateTime({ ts, zone, loc });
   }
 
+  /**
+   * @private
+   */
   // create clone arguments for a new DT instance by adding a duration, adjusting for DSTs
   private adjustTime(dur: Duration) {
     const oPre = this.o,
@@ -2065,6 +2083,9 @@ export default class DateTime {
     return { ts, o };
   }
 
+  /**
+   * @private
+   */
   private static normalizeWithDefaults<T>(
     objNow: T,
     normalized: Partial<T>,
@@ -2085,6 +2106,9 @@ export default class DateTime {
     }
   }
 
+  /**
+   * @private
+   */
   private static diffRelative(start: DateTime, end: DateTime, options: DiffRelativeOptions) {
     const round = isUndefined(options.round) ? true : options.round,
       format = (c: number, unit: ToRelativeUnit) => {
@@ -2119,10 +2143,11 @@ export default class DateTime {
   }
 }
 
+export type DateTimeLike = DateTime | Date | GenericDateTime;
+
 /**
  * @private
  */
-export type DateTimeLike = DateTime | Date | GenericDateTime;
 export function friendlyDateTime(dateTimeish: DateTimeLike | unknown) {
   if (DateTime.isDateTime(dateTimeish)) {
     return dateTimeish;

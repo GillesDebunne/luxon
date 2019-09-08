@@ -47,10 +47,12 @@ suite
     dt.toLocaleString();
   })
   .on("cycle", event => {
+    // eslint-disable-next-line no-undef
     console.log(String(event.target));
   })
   // eslint-disable-next-line func-names
   .on("complete", function() {
+    // eslint-disable-next-line no-undef
     console.log("Fastest is " + this.filter("fastest").map("name"));
   })
   .run();

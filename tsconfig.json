@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "outDir": "build",
+    "outDir": "transpiled",
     "module": "es2015",
     "moduleResolution": "node",
     "lib": ["es6", "es2017.intl", "dom"],
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "removeComments": true,
     "strict": true,
     "types": ["jest"],
     "noEmit": true,
