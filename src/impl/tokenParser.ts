@@ -13,7 +13,7 @@ interface UnitParser {
   regex: RegExp;
   deser: (_: string[]) => number | string;
   groups?: number;
-  literal?: boolean; // GILLES investigate if this shall not be merged with token.literal
+  literal?: boolean; // TODO investigate if this shall not be merged with token.literal
   token: FormatToken;
 }
 
@@ -37,7 +37,6 @@ function stripInsensitivities(s: string) {
 }
 
 function oneOf(strings: string[], startIndex: number): CoreUnitParser {
-  // GILLES removed null case
   return {
     regex: RegExp(strings.map(fixListRegex).join("|")),
     deser: ([s]) =>
@@ -198,7 +197,7 @@ function unitForToken(token: FormatToken, loc: Locale) {
 
 function buildRegex(units: UnitParser[]) {
   const re = units.map(u => u.regex).reduce((f, r) => `${f}(${r.source})`, "");
-  return `^${re}$`; // GILLES units not needed
+  return `^${re}$`;
 }
 
 function match(
@@ -280,7 +279,7 @@ function dateTimeFromMatches(
   }
 
   if (!isUndefined(matches.u)) {
-    matches.S = parseMillis(matches.u as string) || 0; // GILLES added 0 (if matches.u = '' or null)
+    matches.S = parseMillis(matches.u as string) || 0;
   }
 
   const vals = Object.keys(matches).reduce<GenericDateTime>((r, k) => {

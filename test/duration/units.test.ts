@@ -110,6 +110,29 @@ test("Duration#normalize handles the full grid partially negative durations", ()
   });
 });
 
+test("Duration#normalize can convert all unit pairs", () => {
+  const units = [
+    "years",
+    "quarters",
+    "months",
+    "weeks",
+    "days",
+    "hours",
+    "minutes",
+    "seconds",
+    "milliseconds"
+  ];
+
+  for (let i = 0; i < units.length; i++) {
+    for (let j = i + 1; j < units.length; j++) {
+      const duraction = Duration.fromObject({ [units[i]]: 1, [units[j]]: 2 });
+      expect(() => duraction.normalize()).not.toThrow();
+      const accurateDuration = duraction.reconfigure({ conversionAccuracy: "longterm" });
+      expect(() => accurateDuration.normalize()).not.toThrow();
+    }
+  }
+});
+
 //------
 // #as()
 //-------

@@ -52,7 +52,7 @@ const lowOrderMatrix = {
   casualMatrix: ConversionMatrix = Object.assign(
     {
       years: {
-        quarters: 4, // GILLES added
+        quarters: 4,
         months: 12,
         weeks: 52,
         days: 365,
@@ -67,7 +67,7 @@ const lowOrderMatrix = {
         days: 91,
         hours: 91 * 24,
         minutes: 91 * 24 * 60,
-        seconds: 91 * 24 * 60 * 60, // GILLES added
+        seconds: 91 * 24 * 60 * 60,
         milliseconds: 91 * 24 * 60 * 60 * 1000
       },
       months: {
@@ -86,7 +86,7 @@ const lowOrderMatrix = {
   accurateMatrix: ConversionMatrix = Object.assign(
     {
       years: {
-        quarters: 4, // GILLES added
+        quarters: 4,
         months: 12,
         weeks: daysInYearAccurate / 7,
         days: daysInYearAccurate,

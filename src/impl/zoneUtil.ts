@@ -28,11 +28,5 @@ export function normalizeZone(input: ZoneLike, defaultZone: Zone) {
     return FixedOffsetZone.parseSpecifier(lowered) || new InvalidZone(input);
   }
   if (isNumber(input)) return FixedOffsetZone.instance(input);
-  // GILLES commenting out for now
-  // if (typeof input === "object" && input.offset && typeof input.offset === "number") {
-  // This is dumb, but the instanceof check above doesn't seem to really work
-  // so we're duck checking it
-  // return input;
-  // }
   return new InvalidZone(input);
 }

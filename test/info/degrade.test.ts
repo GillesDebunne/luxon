@@ -121,8 +121,6 @@ Helpers.withoutFTP("Info.weekdays lists the narrow weekdays in English without F
   expect(Info.weekdays("narrow", { locale: "fr" })).toEqual(["M", "T", "W", "T", "F", "S", "S"]);
 });
 
-// GILLES removed since DTF only support StringUnitLength
-
 //------
 // Info.meridiems()
 //------

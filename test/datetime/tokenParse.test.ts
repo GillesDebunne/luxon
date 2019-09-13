@@ -406,8 +406,8 @@ test("DateTime.fromFormat() rejects gibberish", () => {
 
 test("DateTime.fromFormat() rejects out-of-range values", () => {
   // todo - these are actually several different kinds of errors. clean this up
-  const rejects = (s: string, fmt: string, opts = {}) =>
-    expect(() => DateTime.fromFormat(s, fmt, opts)).toThrow();
+  const rejects = (s: string, fmt: string, options = {}) =>
+    expect(() => DateTime.fromFormat(s, fmt, options)).toThrow();
 
   rejects("8, 05/25/1982", "E, MM/dd/yyyy", { locale: "fr" });
   rejects("Tuesday, 05/25/1982", "EEEE, MM/dd/yyyy", { locale: "fr" });

@@ -104,8 +104,8 @@ function intlConfigString(
       return localeStr;
     }
   } else {
-    // arbitrary value, should never be used, all calls are protected by an hasIntl check
-    return ""; // GILLES so that return type is always a string
+    // arbitrary value, should never be used, all subsequent uses of this.intl are protected by an hasIntl check
+    return "";
   }
 }
 
@@ -137,7 +137,7 @@ function listStuff<T extends UnitLength>(
   const mode = loc.listingMode(defaultOK);
 
   if (mode === "error") {
-    return []; // GILLES so that result is always string[]
+    return [];
   } else if (mode === "en") {
     return englishFn(length);
   } else {
@@ -192,8 +192,6 @@ class PolyDateFormatter {
 
   constructor(dt: DateTime, intl: string, options: DateTimeFormatOptions) {
     this.options = options;
-    // GILLES removed hasIntl property
-    // this.hasIntl property replaced by this.dtf !== undefined
     const hasIntlDTF = hasIntl();
 
     let z;
@@ -256,8 +254,8 @@ class PolyDateFormatter {
       return {
         locale: "en-US",
         numberingSystem: "latn",
-        calendar: "gregory", // GILLES typo here
-        timeZone: "UTC" // GILLES added
+        calendar: "gregory",
+        timeZone: "UTC"
       };
     }
   }
@@ -415,7 +413,6 @@ export default class Locale {
   }
 
   clone(alts: LocaleOptions, defaultToEN = false) {
-    // GILLES defaultToEN as a separate parameter
     if (!alts || Object.getOwnPropertyNames(alts).length === 0) {
       return this;
     } else {
@@ -438,7 +435,6 @@ export default class Locale {
 
   months(length: UnitLength, format = false, defaultOK = true) {
     return listStuff(this, length, defaultOK, English.months, len => {
-      // GILLES using len parameter instead of length closure (same below)
       const intl = format ? { month: len, day: "numeric" } : { month: len },
         formatStr = format ? "format" : "standalone";
       if (!this.monthsCache[formatStr][len]) {
@@ -464,7 +460,7 @@ export default class Locale {
   meridiems(defaultOK = true) {
     return listStuff(
       this,
-      "long", // arbitrary value, unused // GILLES
+      "long", // arbitrary unued value
       defaultOK,
       () => English.meridiems,
       () => {
@@ -473,7 +469,7 @@ export default class Locale {
         if (this.meridiemCache === undefined) {
           const intl = { hour: "numeric", hour12: true };
           this.meridiemCache = [DateTime.utc(2016, 11, 13, 9), DateTime.utc(2016, 11, 13, 19)].map(
-            dt => this.extract(dt, intl, "dayPeriod") // GILLES capital P
+            dt => this.extract(dt, intl, "dayPeriod")
           );
         }
 
@@ -504,16 +500,16 @@ export default class Locale {
   extract(dt: DateTime, intlOpts: DateTimeFormatOptions, field: Intl.DateTimeFormatPartTypes) {
     const df = this.dtFormatter(dt, intlOpts),
       results = df.formatToParts(),
-      // GILLES compare in lower case, type is 'dayperiod' instead of 'dayPeriod'
+      // Lower case comparison, type is 'dayperiod' instead of 'dayPeriod' in documentation
       matching = results.find(
         (m: Intl.DateTimeFormatPart) => m.type.toLowerCase() === field.toLowerCase()
       );
 
-    return matching ? matching.value : ""; // should never happen // GILLES
+    if (!matching) throw new Error(`Invalid extract field ${field}`);
+    return matching.value;
   }
 
   numberFormatter(options: NumberFormatterOptions = {}) {
-    // GILLES removed forceSimple
     return new PolyNumberFormatter(this.intl, this.fastNumbers, options);
   }
 

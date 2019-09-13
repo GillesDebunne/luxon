@@ -57,11 +57,11 @@ const withoutZones = function(name: string, f: Function) {
     const { DateTimeFormat } = Intl;
     try {
       // @ts-ignore
-      Intl.DateTimeFormat = (locale, opts = {}) => {
-        if (opts.timeZone) {
-          throw new Error(`Unsupported time zone specified ${opts.timeZone}`);
+      Intl.DateTimeFormat = (locale, options = {}) => {
+        if (options.timeZone) {
+          throw new Error(`Unsupported time zone specified ${options.timeZone}`);
         }
-        return DateTimeFormat(locale, opts);
+        return DateTimeFormat(locale, options);
       };
 
       Intl.DateTimeFormat.prototype = DateTimeFormat.prototype;

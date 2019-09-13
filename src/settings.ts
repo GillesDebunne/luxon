@@ -46,7 +46,6 @@ export default class Settings {
    * @param {Zone | string | number} [zone='system'] - the zone value
    */
   static setDefaultZone(zone?: ZoneLike) {
-    // GILLES change API !!!
     defaultZone = zone;
   }
 

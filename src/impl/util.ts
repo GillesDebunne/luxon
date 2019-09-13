@@ -34,7 +34,7 @@ export function isDate(o: unknown): o is Date {
 
 export function hasIntl() {
   try {
-    return typeof Intl !== "undefined" && !!Intl.DateTimeFormat; // GILLES added !!
+    return typeof Intl !== "undefined" && !!Intl.DateTimeFormat;
   } catch (e) {
     return false;
   }
@@ -70,7 +70,6 @@ export function bestBy<T, U>(arr: T[], by: (_: T) => U, compare: (_: U, __: U) =
     }
   }, undefined);
 
-  // GILLES in case arr is empty
   if (best === undefined) throw new InvalidArgumentError("bestBy expects a non empty array");
 
   return best[1];
@@ -139,7 +138,6 @@ export function daysInYear(year: number) {
 export function daysInMonth(year: number, month: number) {
   const modMonth = floorMod(month - 1, 12) + 1,
     modYear = year + (month - modMonth) / 12;
-  // GILLES refactor
   return [31, isLeapYear(modYear) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][modMonth - 1];
 }
 
@@ -156,7 +154,6 @@ export function objToLocalTS(obj: GregorianDateTime) {
   );
 
   // for legacy reasons, years between 0 and 99 are interpreted as 19XX; revert that
-  // GILLES refactor
   if (numberBetween(obj.year, 0, 99)) {
     const date = new Date(ts);
     date.setUTCFullYear(date.getUTCFullYear() - 1900);
@@ -200,7 +197,7 @@ export function parseZoneInfo(
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
-      timeZone // GILLES refactor
+      timeZone
     };
 
   const modified: DateTimeFormatOptions = Object.assign({ timeZoneName: offsetFormat }, intlOpts),

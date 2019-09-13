@@ -100,7 +100,7 @@ export function hasInvalidWeekData(obj: WeekDateTime): UnitError {
   if (!validYear) {
     return ["weekYear", obj.weekYear];
   } else if (!validWeek) {
-    return ["weekNumber", obj.weekNumber]; // GILLES fix typo week/weekNumber
+    return ["weekNumber", obj.weekNumber];
   } else if (!validWeekday) {
     return ["weekday", obj.weekday];
   } else return null;

@@ -67,6 +67,7 @@ import {
 import { DurationUnit } from "./types/duration";
 import { LocaleOptions, NumberingSystem, CalendarSystem } from "./types/locale";
 import { ThrowOnInvalid } from "./types/common";
+import { ZoneLike } from "./types/zone";
 
 const MAX_DATE = 8.64e15;
 
@@ -136,7 +137,7 @@ function parseDataToDateTime(
         setZone: undefined
       }),
       inst = DateTime.fromObject(parsed, opts);
-    if (inst !== null) return setZone ? inst : inst.setZone(zone || "default"); // GILLES in case zone is not set
+    if (inst !== null) return setZone ? inst : inst.setZone(zone);
   }
   if (options.nullOnInvalid) return null;
   throw new UnparsableStringError(format, text);
@@ -193,7 +194,7 @@ function toTechTimeFormat(
 
 // defaults for unspecified units in the supported calendars
 const defaultUnitValues = {
-    year: 0, // unused // GILLES
+    year: 0, // unused value
     month: 1,
     day: 1,
     hour: 0,
@@ -343,7 +344,6 @@ export default class DateTime {
    * @access private
    */
   private constructor(config: Config) {
-    // GILLES removed test isNan on ts
     const zone = config.zone || Settings.defaultZone;
     if (!zone.isValid) {
       throw new InvalidZoneError(zone);
@@ -652,9 +652,9 @@ export default class DateTime {
         : containsOrdinal
         ? ordinalToGregorian(normalized as OrdinalDateTime)
         : (normalized as GregorianDateTime),
-      [tsFinal] = objToTS(gregorian, offsetProvis, zoneToUse), // GILLES offset ignored
+      ts = objToTS(gregorian, offsetProvis, zoneToUse)[0],
       inst = new DateTime({
-        ts: tsFinal,
+        ts,
         zone: zoneToUse,
         loc
       });
@@ -773,10 +773,9 @@ export default class DateTime {
     }
 
     const localeToUse = Locale.create(
-        // GILLES Locale.fromOpts removed
         options.locale,
         options.numberingSystem,
-        options.outputCalendar, // GILLES check, was ignored before
+        options.outputCalendar,
         true /* defaultToEN */
       ),
       [vals, parsedZone, invalid] = parseFromTokens(localeToUse, text, format);
@@ -1197,7 +1196,7 @@ export default class DateTime {
    * @param {boolean} [options.keepLocalTime=false] - If true, adjust the underlying time so that the local time stays the same, but in the target zone. You should rarely need this.
    * @return {DateTime}
    */
-  setZone(zone: string | Zone, { keepLocalTime = false }: ZoneOptions = {}) {
+  setZone(zone: ZoneLike, { keepLocalTime = false }: ZoneOptions = {}) {
     zone = normalizeZone(zone, Settings.defaultZone);
     if (zone.equals(this.zone)) {
       return this;
@@ -1208,7 +1207,7 @@ export default class DateTime {
       if (keepLocalTime) {
         const offsetGuess = this.o - zone.offset(this.ts);
         const asObj = this.toObject();
-        [newTS] = objToTS(asObj, offsetGuess, zone);
+        newTS = objToTS(asObj, offsetGuess, zone)[0];
       }
       return this.clone({ ts: newTS, zone });
     }
@@ -1645,7 +1644,6 @@ export default class DateTime {
 
     const units = maybeArray(unit).map(Duration.normalizeUnit);
 
-    // GILLES added this test, for an invariant used in diff()
     if (units.length === 0) throw new InvalidArgumentError("At least one unit must be specified");
 
     const otherIsLater = other.valueOf() > this.valueOf(),
@@ -1687,7 +1685,6 @@ export default class DateTime {
    */
   hasSame(other: DateTime, unit: DurationUnit) {
     if (Duration.normalizeUnit(unit) === "milliseconds") {
-      // GILLES added normalizeUnit
       return this.valueOf() === other.valueOf();
     } else {
       const inputMs = other.valueOf();
@@ -1737,7 +1734,7 @@ export default class DateTime {
       Object.assign(options, {
         numeric: "always" as const,
         units: ["years", "months", "days", "hours", "minutes", "seconds"] as ToRelativeUnit[],
-        calendary: false // GILLES added calendary
+        calendary: false
       })
     );
   }
@@ -1810,7 +1807,7 @@ export default class DateTime {
     const localeToUse = Locale.create(
       options.locale,
       options.numberingSystem,
-      options.outputCalendar, // GILLES check, was ignored before
+      options.outputCalendar,
       true /* defaultToEN */
     );
 
@@ -2045,7 +2042,7 @@ export default class DateTime {
       }
 
       const offsetProvis = zone.offset(tsNow);
-      [ts] = objToTS(obj, offsetProvis, zone); // GILLES skip offset
+      ts = objToTS(obj, offsetProvis, zone)[0];
     } else {
       ts = tsNow;
     }
@@ -2115,7 +2112,7 @@ export default class DateTime {
     const round = isUndefined(options.round) ? true : options.round,
       format = (c: number, unit: ToRelativeUnit) => {
         c = roundTo(c, round || options.calendary ? 0 : 2, true);
-        const formatter = end.loc.relFormatter(options); // GILLES no loc clone
+        const formatter = end.loc.clone(options).relFormatter(options);
         return formatter.format(c, unit);
       },
       differ = (unit: ToRelativeUnit) => {
@@ -2146,20 +2143,3 @@ export default class DateTime {
 }
 
 export type DateTimeLike = DateTime | Date | GenericDateTime;
-
-/**
- * @private
- */
-export function friendlyDateTime(dateTimeish: DateTimeLike | unknown) {
-  if (DateTime.isDateTime(dateTimeish)) {
-    return dateTimeish;
-  } else if (typeof dateTimeish === "object" && dateTimeish) {
-    // GILLES date included here in object
-    if (isNumber(dateTimeish.valueOf())) return DateTime.fromJSDate(dateTimeish as Date);
-    return DateTime.fromObject(dateTimeish);
-  } else {
-    throw new InvalidArgumentError(
-      `Unknown datetime argument: ${dateTimeish}, of type ${typeof dateTimeish}`
-    );
-  }
-}

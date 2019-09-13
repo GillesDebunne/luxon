@@ -228,7 +228,7 @@ export class DateTime {
   ): { locale: string; numberingSystem: NumberingSystem; outputCalendar: CalendarSystem };
   set(values: GenericDateTime): DateTime;
   setLocale(locale: string): DateTime;
-  setZone(zone: string | Zone, { keepLocalTime }?: ZoneOptions): DateTime;
+  setZone(zone: ZoneLike, { keepLocalTime }?: ZoneOptions): DateTime;
   startOf(unit: DurationUnit): DateTime;
   toBSON(): Date;
   toDefaultZone(): DateTime;

@@ -135,7 +135,6 @@ export default class IANAZone extends Zone {
   }
 
   private constructor(name: string) {
-    // GILLES made private, use create instead
     super();
     /** @private **/
     this.zoneName = name;

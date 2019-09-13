@@ -179,7 +179,7 @@ test("Interval#isAfter returns false for intervals containing the input", () => 
 
 test("Interval#isAfter returns false for fully before the input ", () => {
   const n = DateTime.fromISO("1982-05-25T06:00"),
-    i = Interval.fromDateTimes(n.minus({ day: 2 }), n.minus({ day: 1 })); // GILLES was 1 ms
+    i = Interval.fromDateTimes(n.minus({ day: 2 }), n.minus({ day: 1 }));
   expect(i.isAfter(n)).toBe(false);
 });
 

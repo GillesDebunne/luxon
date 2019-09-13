@@ -45,8 +45,7 @@ const numberingSystemsUTF16: { [key in NumberingSystem]: [number, number] } = {
   telu: [3174, 3183],
   thai: [3664, 3673],
   tibt: [3872, 3881],
-  // GILLES added these for consistency
-  latn: [48, 57], // not used by parseDigits, parseInt does it
+  latn: [48, 57], // not used by parseDigits, relying on parseInt instead
   hanidec: [-1, -1] // see special case for hanidec characters below
 };
 

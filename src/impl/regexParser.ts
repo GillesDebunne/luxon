@@ -82,7 +82,7 @@ const offsetRegex = /(?:(Z)|([+-]\d\d)(?::?(\d\d))?)/,
   isoYmdRegex = /([+-]\d{6}|\d{4})(?:-?(\d\d)(?:-?(\d\d))?)?/,
   isoWeekRegex = /(\d{4})-?W(\d\d)(?:-?(\d))?/,
   isoOrdinalRegex = /(\d{4})-?(\d{3})/,
-  extractISOWeekData = simpleParse("weekYear", "weekNumber", "weekday"), // GILLES week*D*ay
+  extractISOWeekData = simpleParse("weekYear", "weekNumber", "weekday"),
   extractISOOrdinalData = simpleParse("year", "ordinal"),
   sqlYmdRegex = /(\d{4})-(\d\d)-(\d\d)/, // dumbed-down version of the ISO one
   sqlTimeRegex = RegExp(
@@ -97,7 +97,7 @@ function int(match: RegExpExecArray, pos: number, fallback: number) {
 
 function extractISOYmd(match: RegExpExecArray, cursor: number): CombinableParseResult {
   const item = {
-    year: int(match, cursor, 0), // GILLES added, 0. never used?
+    year: int(match, cursor, 0), // 0 default value never used?
     month: int(match, cursor + 1, 1),
     day: int(match, cursor + 2, 1)
   };

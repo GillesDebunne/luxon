@@ -128,7 +128,7 @@ export function formatRelativeTime(
 ) {
   const units = {
     years: ["year", "yr."],
-    quarters: ["quarter", "qtr."], // GILLES typo
+    quarters: ["quarter", "qtr."],
     months: ["month", "mo."],
     weeks: ["week", "wk."],
     days: ["day", "day"],
@@ -138,11 +138,12 @@ export function formatRelativeTime(
     milliseconds: [] // never used
   };
 
-  const unitTexts = units[Duration.normalizeUnit(unit)];
-  const lastable = ["hours", "minutes", "seconds"].indexOf(unit) === -1;
+  const normalizedUnit = Duration.normalizeUnit(unit),
+    unitTexts = units[normalizedUnit],
+    lastable = ["hours", "minutes", "seconds"].indexOf(normalizedUnit) === -1;
 
   if (numeric === "auto" && lastable) {
-    const isDay = unit === "days";
+    const isDay = normalizedUnit === "days";
     switch (count) {
       case 1:
         return isDay ? "tomorrow" : `next ${unitTexts[0]}`;
@@ -156,7 +157,7 @@ export function formatRelativeTime(
 
   const isInPast = Object.is(count, -0) || count < 0,
     formatValue = Math.abs(count),
-    formatUnit = narrow ? unitTexts[1] : formatValue === 1 ? unitTexts[0] : unit;
+    formatUnit = narrow ? unitTexts[1] : formatValue === 1 ? unitTexts[0] : normalizedUnit;
   return isInPast ? `${formatValue} ${formatUnit} ago` : `in ${formatValue} ${formatUnit}`;
 }
 

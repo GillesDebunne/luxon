@@ -24,7 +24,6 @@ function stringifyTokens(
   return s;
 }
 
-// GILLES renamed object
 const MacroFormatOptions: Record<string, DateTimeFormatOptions> = {
   D: Formats.DATE_SHORT,
   DD: Formats.DATE_MED,
@@ -135,7 +134,6 @@ export default class Formatter {
   }
 
   formatDateTime(dt: DateTime) {
-    // GILLES removed unused parameter
     const df = this.loc.dtFormatter(dt, this.options);
     return df.format();
   }
@@ -176,7 +174,7 @@ export default class Formatter {
       meridiem = () =>
         knownEnglish
           ? English.meridiemForDateTime(dt)
-          : string({ hour: "numeric", hour12: true }, "dayPeriod"), // GILLES typo
+          : string({ hour: "numeric", hour12: true }, "dayPeriod"),
       month = (length: StringUnitLength, standalone: boolean) =>
         knownEnglish
           ? English.monthForDateTime(dt, length)
@@ -242,12 +240,12 @@ export default class Formatter {
           case "ZZZZ":
             // like EST
             return (
-              dt.zone.offsetName(dt.toMillis(), { format: "short", locale: this.loc.locale }) || "" // GILLES added fallback to ""
+              dt.zone.offsetName(dt.toMillis(), { format: "short", locale: this.loc.locale }) || ""
             );
           case "ZZZZZ":
             // like Eastern Standard Time
             return (
-              dt.zone.offsetName(dt.toMillis(), { format: "long", locale: this.loc.locale }) || "" // GILLES dito
+              dt.zone.offsetName(dt.toMillis(), { format: "long", locale: this.loc.locale }) || ""
             );
           // zone
           case "z":
@@ -331,7 +329,7 @@ export default class Formatter {
             // like 14
             return outputCal
               ? string({ year: "2-digit" }, "year")
-              : this.num(parseInt(dt.year.toString(10).slice(-2), 10), 2); // GILLES toString(10)
+              : this.num(parseInt(dt.year.toString(10).slice(-2), 10), 2);
           case "yyyy":
             // like 0012
             return outputCal ? string({ year: "numeric" }, "year") : this.num(dt.year, 4);

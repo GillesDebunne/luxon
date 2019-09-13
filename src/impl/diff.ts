@@ -32,7 +32,7 @@ function highOrderDiffs(
 
   const results: DurationObject = {};
   let lowestOrder: DurationUnit | undefined,
-    highWater = earlier, // GILLES always define highWater
+    highWater = earlier,
     cursor = earlier.reconfigure();
 
   for (const [unit, differ] of differs) {

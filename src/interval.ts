@@ -1,4 +1,4 @@
-import DateTime, { friendlyDateTime, DateTimeLike } from "./datetime";
+import DateTime, { DateTimeLike } from "./datetime";
 import Duration, { friendlyDuration, DurationLike } from "./duration";
 import { InvalidArgumentError, UnparsableStringError } from "./errors";
 import { ToISOTimeOptions, DiffOptions, DateTimeWithZoneOptions } from "./types/datetime";
@@ -16,6 +16,20 @@ function validateStartEnd(start: DateTime | null, end: DateTime | null) {
       `The end of an interval must be after its start, but you had start=${start.toISO()} and end=${end.toISO()}`
     );
   }
+}
+
+function friendlyDateTime(dateTimeish: DateTimeLike) {
+  if (DateTime.isDateTime(dateTimeish)) {
+    return dateTimeish;
+  } else if (dateTimeish instanceof Date) {
+    return DateTime.fromJSDate(dateTimeish);
+  } else if (typeof dateTimeish === "object" && dateTimeish) {
+    return DateTime.fromObject(dateTimeish);
+  }
+
+  throw new InvalidArgumentError(
+    `Unknown datetime argument: ${dateTimeish}, of type ${typeof dateTimeish}`
+  );
 }
 
 interface Config {
