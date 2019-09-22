@@ -354,18 +354,23 @@ export default class DateTime {
      */
     this.ts = isUndefined(config.ts) ? Settings.now() : config.ts;
 
-    const unchanged = config.old && config.old.ts === this.ts && config.old.zone.equals(zone);
+    let o, c;
+    if (config.old !== undefined && config.old.ts === this.ts && config.old.zone.equals(zone)) {
+      o = config.old.o;
+      c = config.old.c;
+    } else {
+      o = zone.offset(this.ts);
+      c = tsToObj(this.ts, o);
+    }
 
     /**
      * @access private
      */
-
-    this.c = config.old && unchanged ? config.old.c : tsToObj(this.ts, zone.offset(this.ts));
+    this.c = c;
     /**
      * @access private
      */
-    this.o = config.old && unchanged ? config.old.o : zone.offset(this.ts);
-
+    this.o = o;
     /**
      * @access private
      */
@@ -650,8 +655,8 @@ export default class DateTime {
     const gregorian = useWeekData
         ? weekToGregorian(normalized as WeekDateTime)
         : containsOrdinal
-        ? ordinalToGregorian(normalized as OrdinalDateTime)
-        : (normalized as GregorianDateTime),
+          ? ordinalToGregorian(normalized as OrdinalDateTime)
+          : (normalized as GregorianDateTime),
       ts = objToTS(gregorian, offsetProvis, zoneToUse)[0],
       inst = new DateTime({
         ts,
@@ -1307,6 +1312,7 @@ export default class DateTime {
    * @param {string} unit - The unit to go to the beginning of. Can be 'year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second', or 'millisecond'.
    * @example DateTime.local(2014, 3, 3).startOf('month').toISODate(); //=> '2014-03-01'
    * @example DateTime.local(2014, 3, 3).startOf('year').toISODate(); //=> '2014-01-01'
+   * @example DateTime.local(2014, 3, 3, 5, 30).startOf('week').toISOTime(); //=> '2014-03-03', weeks always start on a Monday
    * @example DateTime.local(2014, 3, 3, 5, 30).startOf('day').toISOTime(); //=> '00:00.000-05:00'
    * @example DateTime.local(2014, 3, 3, 5, 30).startOf('hour').toISOTime(); //=> '05:00:00.000-05:00'
    * @return {DateTime}

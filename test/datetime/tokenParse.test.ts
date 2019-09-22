@@ -1,4 +1,5 @@
 import { DateTime } from "../../src/luxon";
+import Helpers from "../helpers";
 /*
 import { 
   ConflictingSpecificationError,
@@ -456,6 +457,29 @@ test("DateTime.fromFormat() with setZone parses IANA zones and sets it", () => {
   expect(d.minute).toBe(10);
 });
 
+test("DateTime.fromFormat() with setZone falls back to provided zone if no zone is found", () => {
+  const d = DateTime.fromFormat("1982/05/25 09:10:11.445", "yyyy/MM/dd HH:mm:ss.SSS", {
+    setZone: true,
+    zone: "Europe/Rome"
+  });
+  expect(d.zoneName).toBe("Europe/Rome");
+  expect(d.offset).toBe(2 * 60);
+  expect(d.hour).toBe(9);
+  expect(d.minute).toBe(10);
+});
+
+test("DateTime.fromFormat() with setZone falls back to default zone if no zone is found", () => {
+  Helpers.withDefaultZone("Asia/Tokyo", () => {
+    const d = DateTime.fromFormat("1982/05/25 09:10:11.445", "yyyy/MM/dd HH:mm:ss.SSS", {
+      setZone: true
+    });
+    expect(d.zoneName).toBe("Asia/Tokyo");
+    expect(d.offset).toBe(9 * 60);
+    expect(d.hour).toBe(9);
+    expect(d.minute).toBe(10);
+  });
+});
+
 test("DateTime.fromFormat() parses fixed offsets", () => {
   const formats = [["Z", "-4"], ["ZZ", "-4:00"], ["ZZZ", "-0400"]];
 
@@ -512,7 +536,7 @@ test("DateTime.fromFormat validates weekdays", () => {
 });
 
 test("DateTime.fromFormat containg special regex token", () => {
-  const ianaFormat = "yyyy-MM-dd[T]HH-mm[']z[']";
+  const ianaFormat = "yyyy-MM-dd[T]HH-mm'z'";
   const dt = DateTime.fromFormat("2019-01-14T11-30'Indian/Maldives'", ianaFormat, {
     setZone: true
   });
