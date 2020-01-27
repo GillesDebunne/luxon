@@ -655,8 +655,8 @@ export default class DateTime {
     const gregorian = useWeekData
         ? weekToGregorian(normalized as WeekDateTime)
         : containsOrdinal
-          ? ordinalToGregorian(normalized as OrdinalDateTime)
-          : (normalized as GregorianDateTime),
+        ? ordinalToGregorian(normalized as OrdinalDateTime)
+        : (normalized as GregorianDateTime),
       ts = objToTS(gregorian, offsetProvis, zoneToUse)[0],
       inst = new DateTime({
         ts,

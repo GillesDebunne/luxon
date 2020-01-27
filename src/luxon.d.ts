@@ -443,7 +443,7 @@ export class Interval {
   mapEndpoints(mapFn: (dt: DateTime) => DateTime): Interval;
   overlaps(other: Interval): boolean;
   set(interval: IntervalObject): Interval;
-  splitAt(...dateTimes: (DateTimeLike)[]): Interval[];
+  splitAt(...dateTimes: DateTimeLike[]): Interval[];
   splitBy(duration: DurationLike): Interval[];
   toDuration(unit?: DurationUnit | DurationUnit[], options?: DiffOptions): Duration;
   toFormat(dateFormat: string, options?: { separator: string }): string;

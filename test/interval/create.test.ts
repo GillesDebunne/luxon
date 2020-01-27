@@ -38,14 +38,20 @@ test("Interval.fromDateTimes creates an interval from Dates", () => {
 test("Interval.fromDateTimes rejects missing or invalid arguments", () => {
   const validDate = DateTime.fromObject({ year: 2016, month: 5, day: 25 });
   // @ts-ignore
-  expect(() => Interval.fromDateTimes(validDate, null)).toThrow(Error /* FIXME jest 8279 InvalidArgumentError */);
+  expect(() => Interval.fromDateTimes(validDate, null)).toThrow(
+    Error /* FIXME jest 8279 InvalidArgumentError */
+  );
   // @ts-ignore
-  expect(() => Interval.fromDateTimes(null, validDate)).toThrow(Error /* FIXME jest 8279 InvalidArgumentError */);
+  expect(() => Interval.fromDateTimes(null, validDate)).toThrow(
+    Error /* FIXME jest 8279 InvalidArgumentError */
+  );
   expect(() => Interval.fromDateTimes(validDate.plus({ days: 1 }), validDate)).toThrow(
     Error /* FIXME jest 8279 InvalidArgumentError */
   );
   // @ts-ignore
-  expect(() => Interval.fromDateTimes(DateTime.local(), true)).toThrow(Error /* FIXME jest 8279 InvalidArgumentError */);
+  expect(() => Interval.fromDateTimes(DateTime.local(), true)).toThrow(
+    Error /* FIXME jest 8279 InvalidArgumentError */
+  );
 });
 
 test("Interval.fromDateTimes throws with start date coming after end date", () => {

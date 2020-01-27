@@ -148,7 +148,9 @@ test('DateTime#setZone accepts "utc-3:30"', () => {
 });
 
 test("DateTime#setZone does not accept dumb things", () => {
-  expect(() => DateTime.local().setZone("utc-yo")).toThrow(Error /* FIXME jest 8279 InvalidZoneError */);
+  expect(() => DateTime.local().setZone("utc-yo")).toThrow(
+    Error /* FIXME jest 8279 InvalidZoneError */
+  );
 });
 
 test("DateTime#setZone accepts IANA zone names", () => {
