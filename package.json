@@ -26,14 +26,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "pretty-quick --staged"
     }
-  },
-  "lint-staged": {
-    "*.{ts,js,json}": [
-      "prettier --write",
-      "git add"
-    ]
   },
   "devDependencies": {
     "@babel/core": "latest",
@@ -67,8 +61,8 @@
     "full-icu": "latest",
     "husky": "latest",
     "jest": "latest",
-    "lint-staged": "latest",
-    "prettier": "1.19.1",
+    "prettier": "^2.0.0",
+    "pretty-quick": "latest",
     "rimraf": "latest",
     "rollup": "latest",
     "rollup-plugin-babel": "latest",
