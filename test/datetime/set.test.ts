@@ -1,5 +1,5 @@
 import { DateTime } from "../../src/luxon";
-// import { InvalidUnitError } from "../../src/errors";
+import { InvalidUnitError } from "../../src/errors";
 
 const dt = DateTime.fromJSDate(new Date(1982, 4, 25, 9, 23, 54, 123));
 
@@ -114,7 +114,7 @@ test("DateTime.set does units in increasing size", () => {
 //------
 test("DateTime#set throws for invalid units", () => {
   // @ts-ignore
-  expect(() => dt.set({ glorb: 200 })).toThrow(Error /* FIXME jest 8279 InvalidUnitError */);
+  expect(() => dt.set({ glorb: 200 })).toThrow(InvalidUnitError);
 });
 
 test("DateTime#set throws for metadata", () => {

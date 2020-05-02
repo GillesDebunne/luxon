@@ -1,5 +1,5 @@
 import { Interval } from "../../src/luxon";
-// import { UnparsableStringError } from "../../src/errors";
+import { UnparsableStringError } from "../../src/errors";
 import { GregorianDateTime } from "../../src/types/datetime";
 
 //------
@@ -125,7 +125,5 @@ const badInputs = [
 ];
 
 test.each(badInputs)("Interval.fromISO will reject [%s]", s => {
-  expect(() => Interval.fromISO(s as string)).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => Interval.fromISO(s as string)).toThrow(UnparsableStringError);
 });

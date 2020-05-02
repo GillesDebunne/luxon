@@ -1,5 +1,5 @@
 import { Duration } from "../../src/luxon";
-// import { UnparsableStringError } from "../../src/errors";
+import { UnparsableStringError } from "../../src/errors";
 import { DurationObject } from "../../src/types/duration";
 
 //------
@@ -58,7 +58,7 @@ test("Duration.fromISO can parse fractions of seconds", () => {
 
 test("Duration.fromISO rejects junk", () => {
   const rejects = (s: string) => {
-    expect(() => Duration.fromISO(s)).toThrow(Error /* FIXME jest 8279 UnparsableStringError */);
+    expect(() => Duration.fromISO(s)).toThrow(UnparsableStringError);
   };
 
   rejects("poop");

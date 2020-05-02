@@ -1,11 +1,11 @@
 import { DateTime } from "../../src/luxon";
-/*
+
 import {
   MismatchedWeekdayError,
   UnparsableStringError,
   UnitOutOfRangeError
 } from "../../src/errors";
-*/
+
 import { GregorianDateTime } from "../../src/types/datetime";
 
 //------
@@ -496,9 +496,7 @@ test("DateTime.fromISO() accepts 24:00", () => {
 });
 
 test("DateTime.fromISO() doesn't accept 24:23", () => {
-  expect(() => DateTime.fromISO("2018-05-25T24:23")).toThrow(
-    Error /* FIXME jest 8279 UnitOutOfRangeError */
-  );
+  expect(() => DateTime.fromISO("2018-05-25T24:23")).toThrow(UnitOutOfRangeError);
 });
 
 test("DateTime.fromISO() accepts some technically incorrect stuff", () => {
@@ -536,8 +534,7 @@ test("DateTime.fromISO() accepts some technically incorrect stuff", () => {
 });
 
 test("DateTime.fromISO() rejects poop", () => {
-  const rejects = (s: string) =>
-    expect(() => DateTime.fromISO(s)).toThrow(Error /* FIXME jest 8279 UnparsableStringError */);
+  const rejects = (s: string) => expect(() => DateTime.fromISO(s)).toThrow(UnparsableStringError);
 
   // @ts-ignore
   rejects(null);
@@ -557,8 +554,7 @@ test("DateTime.fromISO() rejects poop", () => {
 });
 
 test("DateTime.fromISO() rejects 0s in dates", () => {
-  const rejects = (s: string) =>
-    expect(() => DateTime.fromISO(s)).toThrow(Error /* FIXME jest 8279 UnitOutOfRangeError */);
+  const rejects = (s: string) => expect(() => DateTime.fromISO(s)).toThrow(UnitOutOfRangeError);
   rejects("2016-01-00");
   rejects("2016-00-01");
 });
@@ -606,10 +602,9 @@ test("DateTime.fromRFC2822 parses a range of dates", () => {
 });
 
 test("DateTime.fromRFC2822() rejects incorrect days of the week", () => {
-  expect(() => DateTime.fromRFC2822("Wed, 01 Nov 2016 13:23:12 +0600"))
-    .toThrow
-    // Error /* FIXME jest 8279 MismatchedWeekdayError */
-    ();
+  expect(() => DateTime.fromRFC2822("Wed, 01 Nov 2016 13:23:12 +0600")).toThrow(
+    MismatchedWeekdayError
+  );
 });
 
 test("DateTime.fromRFC2822() can elide the day of the week", () => {

@@ -1,5 +1,5 @@
 import { DateTime, Settings } from "../../src/luxon";
-// import { InvalidZoneError } from "../../src/errors";
+import { InvalidZoneError } from "../../src/errors";
 
 import Helpers from "../helpers";
 
@@ -148,9 +148,7 @@ test('DateTime#setZone accepts "utc-3:30"', () => {
 });
 
 test("DateTime#setZone does not accept dumb things", () => {
-  expect(() => DateTime.local().setZone("utc-yo")).toThrow(
-    Error /* FIXME jest 8279 InvalidZoneError */
-  );
+  expect(() => DateTime.local().setZone("utc-yo")).toThrow(InvalidZoneError);
 });
 
 test("DateTime#setZone accepts IANA zone names", () => {
@@ -196,7 +194,7 @@ test("DateTime#setZone with keepLocalTime can span wacky offsets", () => {
 });
 
 test("DateTime#setZone rejects jibberish", () => {
-  expect(() => dt().setZone("blorp")).toThrow(Error /* FIXME jest 8279 InvalidZoneError */);
+  expect(() => dt().setZone("blorp")).toThrow(InvalidZoneError);
 });
 
 //------

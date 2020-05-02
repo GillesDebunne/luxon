@@ -1,12 +1,12 @@
 import { DateTime } from "../../src/luxon";
-/*
+
 import {
-  UnitOutOfRangeError
+  UnitOutOfRangeError,
   InvalidArgumentError,
   MismatchedWeekdayError,
   InvalidZoneError
 } from "../../src/errors";
-*/
+
 import Settings from "../../src/settings";
 
 import Helpers from "../helpers";
@@ -305,14 +305,10 @@ test("DateTime.fromJSDate(date) accepts a zone option", () => {
 
 test("DateTime.fromJSDate(date) rejects invalid dates", () => {
   // @ts-ignore
-  expect(() => DateTime.fromJSDate("")).toThrow(Error /* FIXME jest 8279 InvalidArgumentError */);
-  expect(() => DateTime.fromJSDate(new Date(""))).toThrow(
-    Error /* FIXME jest 8279 InvalidArgumentError */
-  );
+  expect(() => DateTime.fromJSDate("")).toThrow(InvalidArgumentError);
+  expect(() => DateTime.fromJSDate(new Date(""))).toThrow(InvalidArgumentError);
   // @ts-ignore
-  expect(() => DateTime.fromJSDate(new Date().valueOf())).toThrow(
-    Error /* FIXME jest 8279 InvalidArgumentError */
-  );
+  expect(() => DateTime.fromJSDate(new Date().valueOf())).toThrow(InvalidArgumentError);
 });
 
 test("DateTime.fromJSDate accepts the default locale", () => {
@@ -321,21 +317,15 @@ test("DateTime.fromJSDate accepts the default locale", () => {
 
 test("DateTime.fromJSDate(date) throw errors for invalid values", () => {
   // @ts-ignore
-  expect(() => DateTime.fromJSDate("")).toThrow(Error /* FIXME jest 8279 InvalidArgumentError */);
-  expect(() => DateTime.fromJSDate(new Date(""))).toThrow(
-    Error /* FIXME jest 8279 InvalidArgumentError */
-  );
+  expect(() => DateTime.fromJSDate("")).toThrow(InvalidArgumentError);
+  expect(() => DateTime.fromJSDate(new Date(""))).toThrow(InvalidArgumentError);
   // @ts-ignore
-  expect(() => DateTime.fromJSDate(new Date().valueOf())).toThrow(
-    Error /* FIXME jest 8279 InvalidArgumentError */
-  );
+  expect(() => DateTime.fromJSDate(new Date().valueOf())).toThrow(InvalidArgumentError);
   expect(() => DateTime.fromJSDate(new Date(), { zone: "America/Blorp" })).toThrow(
-    Error /* FIXME jest 8279 InvalidZoneError */
+    InvalidZoneError
   );
   // @ts-ignore
-  expect(() => DateTime.fromJSDate("2019-04-16T11:32:32Z")).toThrow(
-    Error /* FIXME jest 8279 InvalidArgumentError */
-  );
+  expect(() => DateTime.fromJSDate("2019-04-16T11:32:32Z")).toThrow(InvalidArgumentError);
 });
 
 //------
@@ -362,7 +352,7 @@ test("DateTime.fromMillis accepts the default locale", () => {
   );
 });
 
-test("DateTime.fromMillis(ms) throws Error /* FIXME jest 8279 InvalidArgumentError */ for non-numeric input", () => {
+test("DateTime.fromMillis(ms) throws InvalidArgumentError for non-numeric input", () => {
   // @ts-ignore
   expect(() => DateTime.fromMillis("slurp")).toThrow();
 });
@@ -394,7 +384,7 @@ test("DateTime.fromSeconds accepts the default locale", () => {
   Helpers.withDefaultLocale("fr", () => expect(DateTime.fromSeconds(391147200).locale).toBe("fr"));
 });
 
-test("DateTime.fromSeconds(seconds) throws Error /* FIXME jest 8279 InvalidArgumentError */ for non-numeric input", () => {
+test("DateTime.fromSeconds(seconds) throws InvalidArgumentError for non-numeric input", () => {
   // @ts-ignore
   expect(() => DateTime.fromSeconds("slurp")).toThrow();
 });
@@ -496,9 +486,7 @@ test("DateTime.fromObject() accepts a Zone as the zone option", () => {
 });
 
 test("DateTime.fromObject() rejects invalid zones", () => {
-  expect(() => DateTime.fromObject({}, { zone: "blorp" })).toThrow(
-    Error /* FIXME jest 8279 InvalidZoneError */
-  );
+  expect(() => DateTime.fromObject({}, { zone: "blorp" })).toThrow(InvalidZoneError);
 });
 
 test("DateTime.fromObject() ignores the case of object keys", () => {
@@ -531,16 +519,10 @@ test("DateTime.fromObject() throws with invalid value types", () => {
 });
 
 test("DateTime.fromObject() rejects invalid values", () => {
-  expect(() => DateTime.fromObject({ ordinal: 5000 })).toThrow(
-    Error /* FIXME jest 8279 UnitOutOfRangeError */
-  );
-  expect(() => DateTime.fromObject({ minute: -6 })).toThrow(
-    Error /* FIXME jest 8279 UnitOutOfRangeError */
-  );
+  expect(() => DateTime.fromObject({ ordinal: 5000 })).toThrow(UnitOutOfRangeError);
+  expect(() => DateTime.fromObject({ minute: -6 })).toThrow(UnitOutOfRangeError);
   // @ts-ignore
-  expect(() => DateTime.fromObject({ millisecond: new Date() })).toThrow(
-    Error /* FIXME jest 8279 UnitOutOfRangeError */
-  );
+  expect(() => DateTime.fromObject({ millisecond: new Date() })).toThrow(UnitOutOfRangeError);
 });
 
 test("DateTime.fromObject() defaults high-order values to the current date", () => {
@@ -644,10 +626,10 @@ test("DateTime.fromObject() w/ordinal defaults to the current year", () => {
 
 test("DateTime.fromObject() rejects invalid values", () => {
   expect(() => DateTime.fromObject({ weekYear: 2017, weekNumber: 54 })).toThrow(
-    Error /* FIXME jest 8279 UnitOutOfRangeError */
+    UnitOutOfRangeError
   );
   expect(() => DateTime.fromObject({ weekYear: 2017, weekNumber: 15, weekday: 0 })).toThrow(
-    Error /* FIXME jest 8279 UnitOutOfRangeError */
+    UnitOutOfRangeError
   );
 });
 
@@ -680,7 +662,7 @@ test("DateTime.fromObject accepts plurals and weird capitalization", () => {
 test("DateTime.fromObject validates weekdays", () => {
   expect(DateTime.fromObject({ year: 2005, month: 12, day: 13, weekday: 2 })).toBeTruthy();
   expect(() => DateTime.fromObject({ year: 2005, month: 12, day: 13, weekday: 1 })).toThrow(
-    Error /* FIXME jest 8279 MismatchedWeekdayError */
+    MismatchedWeekdayError
   );
 });
 

@@ -1,12 +1,10 @@
 import { DateTime } from "../../src/luxon";
 import Helpers from "../helpers";
-/*
-import { 
+import {
   ConflictingSpecificationError,
   UnparsableStringError,
   MismatchedWeekdayError
 } from "../../src/errors";
-*/
 
 //------
 // .fromFormat
@@ -69,41 +67,29 @@ test("DateTime.fromFormat() parses meridiems", () => {
 });
 
 test("DateTime.fromFormat() parses variable-digit years", () => {
-  expect(() => DateTime.fromFormat("", "y")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("", "y")).toThrow(UnparsableStringError);
   expect(DateTime.fromFormat("2", "y").year).toBe(2);
   expect(DateTime.fromFormat("22", "y").year).toBe(22);
   expect(DateTime.fromFormat("222", "y").year).toBe(222);
   expect(DateTime.fromFormat("2222", "y").year).toBe(2222);
   expect(DateTime.fromFormat("22222", "y").year).toBe(22222);
   expect(DateTime.fromFormat("222222", "y").year).toBe(222222);
-  expect(() => DateTime.fromFormat("2222222", "y")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("2222222", "y")).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat() with yyyyy optionally parses extended years", () => {
-  expect(() => DateTime.fromFormat("222", "yyyyy")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("222", "yyyyy")).toThrow(UnparsableStringError);
   expect(DateTime.fromFormat("2222", "yyyyy").year).toBe(2222);
   expect(DateTime.fromFormat("22222", "yyyyy").year).toBe(22222);
   expect(DateTime.fromFormat("222222", "yyyyy").year).toBe(222222);
-  expect(() => DateTime.fromFormat("2222222", "yyyyy")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("2222222", "yyyyy")).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat() with yyyyyy strictly parses extended years", () => {
-  expect(() => DateTime.fromFormat("2222", "yyyyyy")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("2222", "yyyyyy")).toThrow(UnparsableStringError);
   expect(DateTime.fromFormat("222222", "yyyyyy").year).toBe(222222);
   expect(DateTime.fromFormat("022222", "yyyyyy").year).toBe(22222);
-  expect(() => DateTime.fromFormat("2222222", "yyyyyy")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("2222222", "yyyyyy")).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat() defaults yy to the right century", () => {
@@ -127,25 +113,17 @@ test("DateTime.fromFormat() parses milliseconds", () => {
   expect(DateTime.fromFormat("1", "S").millisecond).toBe(1);
   expect(DateTime.fromFormat("12", "S").millisecond).toBe(12);
   expect(DateTime.fromFormat("123", "S").millisecond).toBe(123);
-  expect(() => DateTime.fromFormat("1234", "S")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("1234", "S")).toThrow(UnparsableStringError);
 
   expect(DateTime.fromFormat("1", "S").millisecond).toBe(1);
   expect(DateTime.fromFormat("12", "S").millisecond).toBe(12);
   expect(DateTime.fromFormat("123", "S").millisecond).toBe(123);
 
-  expect(() => DateTime.fromFormat("1", "SSS")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
-  expect(() => DateTime.fromFormat("12", "SSS")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("1", "SSS")).toThrow(UnparsableStringError);
+  expect(() => DateTime.fromFormat("12", "SSS")).toThrow(UnparsableStringError);
   expect(DateTime.fromFormat("123", "SSS").millisecond).toBe(123);
   expect(DateTime.fromFormat("023", "SSS").millisecond).toBe(23);
-  expect(() => DateTime.fromFormat("1234", "SSS")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("1234", "SSS")).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat() parses fractional seconds", () => {
@@ -258,7 +236,7 @@ test("DateTime.fromFormat() does not match arbitrary stuff with those periods", 
     DateTime.fromFormat("janvQ 25 1982", "LLL dd yyyy", {
       locale: "fr"
     })
-  ).toThrow(Error /* FIXME jest 8279 UnparsableStringError */);
+  ).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat() uses case-insensitive matching", () => {
@@ -270,8 +248,6 @@ test("DateTime.fromFormat() uses case-insensitive matching", () => {
   expect(i.day).toBe(25);
 });
 
-test("DateTime.fromFormat() parses offsets", () => {});
-
 test("DateTime.fromFormat() validates weekday numbers", () => {
   const d = DateTime.fromFormat("2, 05/25/1982", "E, LL/dd/yyyy");
   expect(d.year).toBe(1982);
@@ -279,7 +255,7 @@ test("DateTime.fromFormat() validates weekday numbers", () => {
   expect(d.day).toBe(25);
 
   expect(() => DateTime.fromFormat("1, 05/25/1982", "E, LL/dd/yyyy")).toThrow(
-    Error /* FIXME jest 8279 MismatchedWeekdayError */
+    MismatchedWeekdayError
   );
 });
 
@@ -290,7 +266,7 @@ test("DateTime.fromFormat() validates weekday names", () => {
   expect(d.day).toBe(25);
 
   expect(() => DateTime.fromFormat("Monday, 05/25/1982", "EEEE, LL/dd/yyyy")).toThrow(
-    Error /* FIXME jest 8279 MismatchedWeekdayError */
+    MismatchedWeekdayError
   );
 
   d = DateTime.fromFormat("mardi, 05/25/1982", "EEEE, LL/dd/yyyy", {
@@ -339,11 +315,11 @@ test("DateTime.fromFormat() parses ordinals", () => {
 test("DateTime.fromFormat() throws on mixed units", () => {
   expect(() => {
     DateTime.fromFormat("2017 34", "yyyy WW");
-  }).toThrow(Error /* FIXME jest 8279 ConflictingSpecificationError */);
+  }).toThrow(ConflictingSpecificationError);
 
   expect(() => {
     DateTime.fromFormat("2017 05 340", "yyyy MM ooo");
-  }).toThrow(Error /* FIXME jest 8279 ConflictingSpecificationError */);
+  }).toThrow(ConflictingSpecificationError);
 });
 
 test("DateTime.fromFormat() accepts weekYear by itself", () => {
@@ -400,9 +376,7 @@ test("DateTime.fromFormat() allows literals", () => {
 });
 
 test("DateTime.fromFormat() rejects gibberish", () => {
-  expect(() => DateTime.fromFormat("Splurk", "EEEE")).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
-  );
+  expect(() => DateTime.fromFormat("Splurk", "EEEE")).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat() rejects out-of-range values", () => {
@@ -524,7 +498,7 @@ test("DateTime.fromFormat() throws if you don't provide a format", () => {
 test("DateTime.fromFormat validates weekdays", () => {
   expect(DateTime.fromFormat("Wed 2017-11-29 02:00", "EEE yyyy-MM-dd HH:mm")).toBeTruthy();
   expect(() => DateTime.fromFormat("Thu 2017-11-29 02:00", "EEE yyyy-MM-dd HH:mm")).toThrow(
-    Error /* FIXME jest 8279 MismatchedWeekdayError */
+    MismatchedWeekdayError
   );
   expect(
     DateTime.fromFormat("Wed 2017-11-29 02:00 +12:00", "EEE yyyy-MM-dd HH:mm ZZ")
@@ -540,7 +514,7 @@ test("DateTime.fromFormat validates weekdays", () => {
     DateTime.fromFormat("Tue 2017-11-29 02:00 +12:00", "EEE yyyy-MM-dd HH:mm ZZ", {
       setZone: true
     })
-  ).toThrow(Error /* FIXME jest 8279 MismatchedWeekdayError */);
+  ).toThrow(MismatchedWeekdayError);
 });
 
 test("DateTime.fromFormat containg special regex token", () => {
@@ -560,7 +534,7 @@ test("DateTime.fromFormat containg special regex token", () => {
 
   expect(() =>
     DateTime.fromFormat("2019-01-14T11-30\tIndian/Maldives\t", "yyyy-MM-dd[T]HH-mm[t]z[t]")
-  ).toThrow(Error /* FIXME jest 8279 UnparsableStringError */);
+  ).toThrow(UnparsableStringError);
 });
 
 test("DateTime.fromFormat accepts a nullOnInvalid option", () => {

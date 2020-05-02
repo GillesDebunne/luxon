@@ -1,5 +1,5 @@
 import { DateTime } from "../../src/luxon";
-// import { InvalidZoneError, UnparsableStringError } from "../../src/errors";
+import { InvalidZoneError, UnparsableStringError } from "../../src/errors";
 
 import Helpers from "../helpers";
 
@@ -87,14 +87,12 @@ Helpers.withoutIntl("DateTime.fromFormat can parse numbers in other locales", ()
 
 Helpers.withoutIntl("DateTime.fromFormat can't parse strings from other locales", () => {
   expect(() => DateTime.fromFormat("mai 15, 2017", "LLLL dd, yyyy", { locale: "fr" })).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
+    UnparsableStringError
   );
 });
 
 Helpers.withoutIntl("using time zones throws", () => {
-  expect(() => DateTime.local().setZone("America/New_York")).toThrow(
-    Error /* FIXME jest 8279 InvalidZoneError */
-  );
+  expect(() => DateTime.local().setZone("America/New_York")).toThrow(InvalidZoneError);
 });
 
 Helpers.withoutIntl("DateTime#zoneName falls back to 'system'", () => {
@@ -143,7 +141,7 @@ Helpers.withoutFTP("DateTime.fromFormat can parse numbers in other locales", () 
 
 Helpers.withoutFTP("DateTime.fromFormat can't parse strings from other locales", () => {
   expect(() => DateTime.fromFormat("mai 15, 2017", "LLLL dd, yyyy", { locale: "fr" })).toThrow(
-    Error /* FIXME jest 8279 UnparsableStringError */
+    UnparsableStringError
   );
 });
 
@@ -198,7 +196,5 @@ Helpers.withoutZones("DateTime#toLocaleParts is unaffected", () => {
 });
 
 Helpers.withoutZones("using time zones results throws", () => {
-  expect(() => DateTime.local().setZone("America/New_York")).toThrow(
-    Error /* FIXME jest 8279 InvalidZoneError */
-  );
+  expect(() => DateTime.local().setZone("America/New_York")).toThrow(InvalidZoneError);
 });
