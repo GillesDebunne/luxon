@@ -1,16 +1,16 @@
 {
   "coverage": "100%",
-  "expectCount": 246,
-  "actualCount": 246,
+  "expectCount": 301,
+  "actualCount": 301,
   "files": {
     "src/datetime.js": {
-      "expectCount": 119,
-      "actualCount": 119,
+      "expectCount": 121,
+      "actualCount": 121,
       "undocumentLines": []
     },
     "src/duration.js": {
-      "expectCount": 43,
-      "actualCount": 43,
+      "expectCount": 44,
+      "actualCount": 44,
       "undocumentLines": []
     },
     "src/errors.js": {
@@ -24,8 +24,8 @@
       "undocumentLines": []
     },
     "src/interval.js": {
-      "expectCount": 42,
-      "actualCount": 42,
+      "expectCount": 44,
+      "actualCount": 44,
       "undocumentLines": []
     },
     "src/settings.js": {
@@ -34,8 +34,28 @@
       "undocumentLines": []
     },
     "src/zone.js": {
-      "expectCount": 8,
-      "actualCount": 8,
+      "expectCount": 9,
+      "actualCount": 9,
+      "undocumentLines": []
+    },
+    "src/zones/IANAZone.js": {
+      "expectCount": 16,
+      "actualCount": 16,
+      "undocumentLines": []
+    },
+    "src/zones/fixedOffsetZone.js": {
+      "expectCount": 13,
+      "actualCount": 13,
+      "undocumentLines": []
+    },
+    "src/zones/invalidZone.js": {
+      "expectCount": 10,
+      "actualCount": 10,
+      "undocumentLines": []
+    },
+    "src/zones/localZone.js": {
+      "expectCount": 10,
+      "actualCount": 10,
       "undocumentLines": []
     }
   }
